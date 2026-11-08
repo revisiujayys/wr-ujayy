@@ -23,3 +23,7 @@ export type CatalogProduct = {
   available: boolean;
   variants: CatalogVariant[];
 };
+
+export type Topping = { id: string; name: string; price: number; available: boolean };
+
+export type DeliveryArea = { id: string; name: string; minOrder: number; fee: number };

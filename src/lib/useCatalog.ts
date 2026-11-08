@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { supabase } from './supabase';
-import type { CatalogProduct, Category, StoreSettings } from './types';
+import type { CatalogProduct, Category, DeliveryArea, StoreSettings, Topping } from './types';
 
 export type Catalog = {
   categories: Category[];
   products: CatalogProduct[];
+  toppings: Topping[];
+  areas: DeliveryArea[];
   settings: StoreSettings;
 };
 
@@ -22,16 +24,28 @@ type ProductRow = {
   product_variants: { id: string; name: string; is_available: boolean; sort_order: number }[] | null;
 };
 
+type ToppingRow = { id: string; name: string; price: number; is_available: boolean };
+type AreaRow = { id: string; name: string; min_order: number; delivery_fee: number };
+
 async function load(): Promise<Catalog> {
-  const [cats, prods, settings] = await Promise.all([
-    supabase.from('categories').select('id, name').order('sort_order'),
+  // Filter is_active eksplisit: admin yang sedang login juga bisa membaca baris nonaktif,
+  // tetapi pelanggan tidak boleh melihatnya.
+  const [cats, prods, tops, areas, settings] = await Promise.all([
+    supabase.from('categories').select('id, name').eq('is_active', true).order('sort_order'),
     supabase
       .from('products')
       .select(
         'id, category_id, name, description, base_price, image_url, product_type, is_available, product_variants(id, name, is_available, sort_order)',
       )
+      .eq('is_active', true)
       .order('sort_order')
       .order('name'),
+    supabase.from('toppings').select('id, name, price, is_available').order('sort_order').order('name'),
+    supabase
+      .from('delivery_areas')
+      .select('id, name, min_order, delivery_fee')
+      .eq('is_active', true)
+      .order('sort_order'),
     supabase
       .from('store_settings')
       .select('is_open, whatsapp_number, address, maps_url, open_time, close_time')
@@ -39,7 +53,9 @@ async function load(): Promise<Catalog> {
       .single(),
   ]);
 
-  if (cats.error || prods.error || settings.error) throw new Error('Gagal memuat katalog');
+  if (cats.error || prods.error || tops.error || areas.error || settings.error) {
+    throw new Error('Gagal memuat katalog');
+  }
 
   const products: CatalogProduct[] = (prods.data as ProductRow[]).map((p) => {
     const variants = [...(p.product_variants ?? [])]
@@ -62,6 +78,18 @@ async function load(): Promise<Catalog> {
   return {
     categories: cats.data as Category[],
     products,
+    toppings: (tops.data as ToppingRow[]).map((t) => ({
+      id: t.id,
+      name: t.name,
+      price: t.price,
+      available: t.is_available,
+    })),
+    areas: (areas.data as AreaRow[]).map((a) => ({
+      id: a.id,
+      name: a.name,
+      minOrder: a.min_order,
+      fee: a.delivery_fee,
+    })),
     settings: settings.data as StoreSettings,
   };
 }

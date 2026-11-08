@@ -1,10 +1,10 @@
 import { rupiah } from '../lib/format';
 import type { CatalogProduct } from '../lib/types';
 
-export function ProductCard({ product }: { product: CatalogProduct }) {
+export function ProductCard({ product, onAdd }: { product: CatalogProduct; onAdd: (p: CatalogProduct) => void }) {
   const soldOut = !product.available;
   return (
-    <article className="overflow-hidden rounded-2xl border border-stone-200 bg-white">
+    <article className="flex flex-col overflow-hidden rounded-2xl border border-stone-200 bg-white">
       <div className="relative aspect-square bg-stone-100">
         {product.imageUrl ? (
           <img
@@ -26,9 +26,17 @@ export function ProductCard({ product }: { product: CatalogProduct }) {
           </div>
         )}
       </div>
-      <div className="p-3">
+      <div className="flex flex-1 flex-col p-3">
         <h3 className="line-clamp-2 min-h-10 text-sm font-medium leading-5">{product.name}</h3>
         <p className="mt-1 text-sm font-semibold text-brand">{rupiah(product.price)}</p>
+        <button
+          type="button"
+          disabled={soldOut}
+          onClick={() => onAdd(product)}
+          className="mt-2 rounded-full bg-stone-900 py-1.5 text-sm font-medium text-white disabled:bg-stone-200 disabled:text-stone-500"
+        >
+          {soldOut ? 'Habis' : '+ Tambah'}
+        </button>
       </div>
     </article>
   );
