@@ -111,9 +111,11 @@ test('pesan WhatsApp memuat ringkasan dan URL ter-encode', () => {
     paymentMethod: 'cod', items: r.items, subtotal: r.subtotal, deliveryFee: r.deliveryFee, total: r.total,
   });
   assert.match(msg, /UJ-TEST-0001/);
-  assert.match(msg, /Mie Uji - Goreng x2/);
-  assert.match(msg, /\+ Telur/);
-  assert.match(msg, /Total: Rp27\.000/);
+  assert.match(msg, /1\. Mie Uji - Goreng\n/);
+  assert.match(msg, /\+ Telur\n\s+2 × Rp11\.000 = Rp22\.000/);
+  assert.match(msg, /\*Total: Rp27\.000\*/);
+  assert.match(msg, /WhatsApp: \+62 812-3456-789/);
+  assert.doesNotMatch(msg, /Mohon kirim detail/); // COD: tanpa permintaan detail pembayaran
   assert.equal(buildWhatsAppUrl(null, msg), null);
   assert.ok(buildWhatsAppUrl('628100000000', msg)!.startsWith('https://wa.me/628100000000?text=Halo'));
 });

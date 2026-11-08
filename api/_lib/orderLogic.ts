@@ -168,35 +168,51 @@ function itemTitle(i: PricedItem): string {
   return `${i.product_name}${variant}${style}`;
 }
 
+// 628123456789 -> +62 812-3456-789
+function displayPhone(p: string): string {
+  if (!/^62\d{9,13}$/.test(p)) return p;
+  const rest = p.slice(2);
+  return `+62 ${rest.slice(0, 3)}-${rest.slice(3, 7)}-${rest.slice(7)}`;
+}
+
 export function buildWhatsAppMessage(o: OrderSummary): string {
   const lines: string[] = [];
   lines.push('Halo Wr. Ujayy, saya mau konfirmasi pesanan:');
   lines.push(`*${o.orderNumber}*`);
+
   lines.push('');
+  lines.push('*PESANAN*');
   o.items.forEach((i, idx) => {
-    lines.push(`${idx + 1}. ${itemTitle(i)} x${i.quantity}`);
-    if (i.toppings.length > 0) lines.push(`   + ${i.toppings.map((t) => t.name).join(', ')}`);
-    lines.push(`   ${rupiah(i.line_total)}`);
+    lines.push(`${idx + 1}. ${itemTitle(i)}`);
+    if (i.toppings.length > 0) lines.push(`    + ${i.toppings.map((t) => t.name).join(', ')}`);
+    lines.push(`    ${i.quantity} × ${rupiah(i.unit_price + i.toppings_total)} = ${rupiah(i.line_total)}`);
   });
+
   lines.push('');
+  lines.push('*RINCIAN*');
   lines.push(`Subtotal: ${rupiah(o.subtotal)}`);
   lines.push(`Ongkir: ${o.deliveryFee === 0 ? 'Gratis' : rupiah(o.deliveryFee)}`);
   lines.push(`*Total: ${rupiah(o.total)}*`);
+
   lines.push('');
+  lines.push('*DATA PEMESAN*');
   lines.push(`Nama: ${o.customerName}`);
-  lines.push(`No. WhatsApp: ${o.customerPhone}`);
+  lines.push(`WhatsApp: ${displayPhone(o.customerPhone)}`);
   if (o.fulfillment === 'delivery') {
-    lines.push(`Pengiriman: Delivery ke ${o.areaName ?? '-'}`);
+    lines.push(`Diantar ke: ${o.areaName ?? '-'}`);
     if (o.address) lines.push(`Alamat: ${o.address}`);
     if (o.rtRw) lines.push(`RT/RW: ${o.rtRw}`);
     if (o.landmark) lines.push(`Patokan: ${o.landmark}`);
   } else {
-    lines.push('Pengambilan: Pickup di warung (dibuat saat saya datang)');
+    lines.push('Ambil di warung (dibuat saat saya datang)');
   }
-  lines.push(
-    `Pembayaran: ${o.paymentMethod === 'cod' ? 'COD (tunai saat pesanan diterima)' : 'QRIS/Transfer (mohon kirim detail pembayaran)'}`,
-  );
+  lines.push(`Pembayaran: ${o.paymentMethod === 'cod' ? 'COD (tunai saat pesanan diterima)' : 'QRIS / Transfer'}`);
   if (o.note) lines.push(`Catatan: ${o.note}`);
+
+  if (o.paymentMethod === 'qris_transfer') {
+    lines.push('');
+    lines.push('Mohon kirim detail pembayarannya ya 🙏');
+  }
   return lines.join('\n');
 }
 
