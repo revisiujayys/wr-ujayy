@@ -11,10 +11,12 @@ import { Splash } from './components/Splash';
 import { WelcomeBanner } from './components/WelcomeBanner';
 import { priceCart, useCart, type AddInput } from './lib/cart';
 import { formatTime, rupiah } from './lib/format';
+import { preloadImages } from './lib/preload';
 import { useDailyTheme } from './lib/theme';
 import { trackVisit } from './lib/track';
 import type { CatalogProduct } from './lib/types';
 import { useCatalog } from './lib/useCatalog';
+import { loadVisitors } from './lib/visitors';
 
 type View = 'catalog' | 'checkout' | 'success';
 
@@ -50,12 +52,32 @@ export default function App() {
   const tracked = useRef(false);
   const [minDone, setMinDone] = useState(false);
   const [splashGone, setSplashGone] = useState(false);
-  useDailyTheme();
+  const themeLoaded = useDailyTheme();
+  const [assetsReady, setAssetsReady] = useState(false);
+  const [hardCap, setHardCap] = useState(false);
 
   useEffect(() => {
     const id = window.setTimeout(() => setMinDone(true), 1300);
-    return () => window.clearTimeout(id);
+    // Batas akhir: koneksi sangat lambat tidak boleh menahan layar pembuka selamanya.
+    const cap = window.setTimeout(() => setHardCap(true), 9000);
+    return () => {
+      window.clearTimeout(id);
+      window.clearTimeout(cap);
+    };
   }, []);
+
+  // Layar pembuka baru hilang setelah katalog, foto produk, tema, dan jumlah pengunjung semuanya siap.
+  useEffect(() => {
+    if (state.status === 'loading') return;
+    let alive = true;
+    const urls = state.status === 'ready' ? state.data.products.map((p) => p.imageUrl).filter((u): u is string => !!u) : [];
+    void Promise.all([preloadImages(urls), loadVisitors()]).then(() => {
+      if (alive) setAssetsReady(true);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [state]);
 
   useEffect(() => {
     if (tracked.current) return;
@@ -99,7 +121,7 @@ export default function App() {
     setView('catalog');
   }
 
-  const ready = state.status !== 'loading' && minDone;
+  const ready = minDone && (hardCap || (state.status !== 'loading' && assetsReady && themeLoaded));
 
   const app = (
     <div className="min-h-dvh pb-24">

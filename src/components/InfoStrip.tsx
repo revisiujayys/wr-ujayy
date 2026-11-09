@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase';
 import { formatWib, useNow } from '../lib/theme';
+import { loadVisitors } from '../lib/visitors';
 
 // Jam WIB berjalan + total pengunjung unik. Dipakai di halaman pelanggan dan admin.
 export function InfoStrip() {
@@ -8,14 +8,16 @@ export function InfoStrip() {
   const [visitors, setVisitors] = useState<number | null>(null);
 
   useEffect(() => {
-    // Sedikit ditunda agar kunjungan ini ikut tercatat lebih dulu.
-    const id = window.setTimeout(() => {
-      void supabase.rpc('visitor_total').then(({ data, error }) => {
-        if (!error && typeof data === 'number') setVisitors(data);
-        else if (!error && typeof data === 'string') setVisitors(Number(data));
-      });
-    }, 1500);
-    const cells = [
+    let alive = true;
+    void loadVisitors().then((v) => {
+      if (alive) setVisitors(v);
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const cells = [
     { label: 'Tanggal', value: date, extra: '' },
     { label: 'Jam', value: `${time} WIB`, extra: 'tabular-nums' },
     { label: 'Pengunjung', value: visitors === null ? '–' : visitors.toLocaleString('id-ID'), extra: 'tabular-nums' },

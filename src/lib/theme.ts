@@ -107,27 +107,42 @@ function applyTheme(id: string): void {
   meta.content = brand;
 }
 
+let themePromise: Promise<void> | null = null;
+
+// Ambil pemetaan tema dari server sekali saja.
+export function loadThemeMap(): Promise<void> {
+  if (!themePromise) {
+    themePromise = Promise.resolve(supabase.from('store_settings').select('day_themes').eq('id', 1).single()).then(
+      ({ data, error }) => {
+        if (!error && data) setThemeMap(sanitizeMap((data as { day_themes: unknown }).day_themes));
+      },
+      () => undefined,
+    );
+  }
+  return themePromise;
+}
+
 // Dipakai di halaman pelanggan maupun admin: tema mengikuti hari (WIB) sesuai pengaturan admin.
-export function useDailyTheme(): void {
+// Mengembalikan true setelah pengaturan dari server selesai dimuat.
+export function useDailyTheme(): boolean {
+  const [loaded, setLoaded] = useState(false);
   const [, rerender] = useState(0);
   const now = useNow(30_000);
 
   useEffect(() => {
+    let alive = true;
     const fn = () => rerender((n) => n + 1);
     listeners.add(fn);
-    void supabase
-      .from('store_settings')
-      .select('day_themes')
-      .eq('id', 1)
-      .single()
-      .then(({ data, error }) => {
-        if (!error && data) setThemeMap(sanitizeMap((data as { day_themes: unknown }).day_themes));
-      });
+    void loadThemeMap().then(() => {
+      if (alive) setLoaded(true);
+    });
     return () => {
+      alive = false;
       listeners.delete(fn);
     };
   }, []);
 
   const id = currentMap[String(wibDay(now))] ?? 'jingga';
   useEffect(() => applyTheme(id), [id]);
+  return loaded;
 }
