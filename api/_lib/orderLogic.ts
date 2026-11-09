@@ -174,102 +174,50 @@ function displayPhone(p: string): string {
   return `+62 ${rest.slice(0, 3)}-${rest.slice(3, 7)}-${rest.slice(7)}`;
 }
 
-// Lebar isi kotak (karakter). Kotak dibungkus ``` agar WhatsApp memakai font monospace
-// sehingga kolom lurus. Lebar dijaga sempit supaya tidak terpotong di layar HP kecil.
-const BOX_WIDTH = 34;
+// Teks biasa, bukan blok monospace. Font monospace dan karakter garis berbeda di tiap HP,
+// sehingga kolom rata-kanan dan tepi kotak sering bergeser. Format ini tidak bergantung pada lebar karakter.
+const DIVIDER = '────────────────────';
 
-function wrapText(text: string, width: number): string[] {
-  const out: string[] = [];
-  let line = '';
-  for (const word of text.split(/\s+/).filter(Boolean)) {
-    let w = word;
-    while (w.length > width) {
-      if (line) {
-        out.push(line);
-        line = '';
-      }
-      out.push(w.slice(0, width));
-      w = w.slice(width);
-    }
-    if (!line) line = w;
-    else if (line.length + 1 + w.length <= width) line += ' ' + w;
-    else {
-      out.push(line);
-      line = w;
-    }
-  }
-  if (line) out.push(line);
-  return out.length > 0 ? out : [''];
-}
-
-const cell = (s: string) => `│ ${s.padEnd(BOX_WIDTH)} │`;
-const rule = (l: string, r: string) => `${l}${'─'.repeat(BOX_WIDTH + 2)}${r}`;
-const clean = (s: string) => s.replace(/`/g, "'").replace(/\s+/g, ' ').trim();
-
-function centered(text: string): string {
-  return cell(text.padStart(Math.floor((BOX_WIDTH + text.length) / 2)));
-}
-
-// Kiri = label, kanan = nilai pendek (rata kanan). Label panjang dibungkus ke baris berikutnya.
-function pair(left: string, right: string): string[] {
-  const parts = wrapText(left, Math.max(BOX_WIDTH - right.length - 1, 8));
-  return parts.map((p, i) => (i === 0 ? cell(p.padEnd(BOX_WIDTH - right.length) + right) : cell(p)));
-}
-
-// Nilai yang bisa panjang (alamat, catatan): jika tidak muat satu baris, turun ke baris bawah.
-function field(label: string, value: string): string[] {
-  const v = clean(value);
-  if (label.length + 1 + v.length <= BOX_WIDTH) return pair(label, v);
-  return [cell(label), ...wrapText(v, BOX_WIDTH - 2).map((l) => cell('  ' + l))];
-}
+// Buang karakter pemicu format WhatsApp (tebal, miring, coret, kode) dan rapikan spasi/baris baru.
+const clean = (s: string) => s.replace(/[*_~`]/g, '').replace(/\s+/g, ' ').trim();
 
 export function buildWhatsAppMessage(o: OrderSummary): string {
-  const box: string[] = [rule('┌', '┐'), centered('KONFIRMASI PESANAN'), rule('├', '┤')];
-  box.push(cell(`ID Pesanan : ${o.orderNumber}`));
+  const lines: string[] = [];
+  lines.push('*KONFIRMASI PESANAN*', DIVIDER, `ID Pesanan: *${o.orderNumber}*`, DIVIDER);
 
-  box.push(rule('├', '┤'), cell('DETAIL PESANAN'));
+  lines.push('*DETAIL PESANAN*');
   o.items.forEach((i, idx) => {
-    const price = rupiah(i.line_total);
-    const title = `${idx + 1}. ${clean(itemTitle(i))}`;
-    const inline = `${title} (${i.quantity}x)`;
-    // Jumlah sebaris dengan nama jika muat; jika tidak, pindah ke baris keterangan.
-    const fits = inline.length <= BOX_WIDTH - price.length - 1;
-    box.push(...pair(fits ? inline : title, price));
-    const details: string[] = [];
-    if (!fits) details.push(`${i.quantity}x`);
-    if (i.noodle_style) details.push(i.noodle_style === 'kuah' ? 'Kuah' : 'Goreng');
-    for (const d of details) box.push(cell('   ' + d));
-    if (i.toppings.length > 0) {
-      const names = clean(i.toppings.map((t) => t.name).join(', '));
-      box.push(...wrapText('+ ' + names, BOX_WIDTH - 3).map((l) => cell('   ' + l)));
-    }
+    lines.push(`${idx + 1}. ${clean(itemTitle(i))} (${i.quantity}x) — ${rupiah(i.line_total)}`);
+    if (i.noodle_style) lines.push(`    ${i.noodle_style === 'kuah' ? 'Kuah' : 'Goreng'}`);
+    if (i.toppings.length > 0) lines.push(`    + ${clean(i.toppings.map((t) => t.name).join(', '))}`);
   });
 
-  box.push(rule('├', '┤'), cell('RINCIAN BIAYA'));
-  box.push(...pair('Subtotal', rupiah(o.subtotal)));
-  box.push(...pair('Ongkir', o.deliveryFee === 0 ? 'Gratis' : rupiah(o.deliveryFee)));
-  box.push(...pair('Pengambilan', o.fulfillment === 'delivery' ? 'Diantar' : 'Ambil di warung'));
-  box.push(...pair('Pembayaran', o.paymentMethod === 'cod' ? 'COD (tunai)' : 'QRIS / Transfer'));
+  lines.push(DIVIDER, '*RINCIAN BIAYA*');
+  lines.push(`Subtotal: ${rupiah(o.subtotal)}`);
+  lines.push(`Ongkir: ${o.deliveryFee === 0 ? 'Gratis' : rupiah(o.deliveryFee)}`);
+  lines.push(`Pengambilan: ${o.fulfillment === 'delivery' ? 'Diantar' : 'Ambil di warung'}`);
+  lines.push(`Pembayaran: ${o.paymentMethod === 'cod' ? 'COD (tunai)' : 'QRIS / Transfer'}`);
 
-  box.push(rule('├', '┤'), ...pair('TOTAL TAGIHAN', rupiah(o.total)));
+  lines.push(DIVIDER, `*TOTAL TAGIHAN: ${rupiah(o.total)}*`, DIVIDER);
 
-  box.push(rule('├', '┤'), cell('DATA PEMESAN'));
-  box.push(...field('Nama', o.customerName));
-  box.push(...field('WhatsApp', displayPhone(o.customerPhone)));
+  lines.push('*DATA PEMESAN*');
+  lines.push(`Nama: ${clean(o.customerName)}`);
+  lines.push(`WhatsApp: ${displayPhone(o.customerPhone)}`);
   if (o.fulfillment === 'delivery') {
-    box.push(...field('Desa', o.areaName ?? '-'));
-    if (o.address) box.push(...field('Alamat', o.address));
-    if (o.rtRw) box.push(...field('RT/RW', o.rtRw));
-    if (o.landmark) box.push(...field('Patokan', o.landmark));
+    lines.push(`Desa: ${clean(o.areaName ?? '-')}`);
+    if (o.address) lines.push(`Alamat: ${clean(o.address)}`);
+    if (o.rtRw) lines.push(`RT/RW: ${clean(o.rtRw)}`);
+    if (o.landmark) lines.push(`Patokan: ${clean(o.landmark)}`);
   }
-  if (o.note) box.push(...field('Catatan', o.note));
-  box.push(rule('└', '┘'));
+  if (o.note) lines.push(`Catatan: ${clean(o.note)}`);
+  lines.push(DIVIDER);
 
-  const closing =
+  lines.push(
     o.paymentMethod === 'qris_transfer'
       ? 'Mohon kirim detail pembayarannya. Terima kasih.'
-      : 'Terima kasih.';
-  return ['```', ...box, '```', closing].join('\n');
+      : 'Terima kasih.',
+  );
+  return lines.join('\n');
 }
 
 export function buildWhatsAppUrl(number: string | null, message: string): string | null {
