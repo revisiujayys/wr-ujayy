@@ -12,7 +12,7 @@ export function OrderSuccess({ result, onDone }: { result: OrderResult; onDone: 
       <section className="grid grid-cols-2 divide-x divide-stone-200 rounded-2xl border border-stone-200 bg-white p-4">
         <div className="px-2">
           <p className="text-xs text-stone-500">Nomor pesanan</p>
-          <p className="mt-1 break-all text-base font-bold tracking-wide">{result.orderNumber}</p>
+          <p className="allow-select mt-1 break-all text-base font-bold tracking-wide">{result.orderNumber}</p>
         </div>
         <div className="px-2">
           <p className="text-xs text-stone-500">Total pembayaran</p>
