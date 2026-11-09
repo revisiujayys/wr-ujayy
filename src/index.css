@@ -76,6 +76,8 @@ input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 3px color-mix(in s
 .reveal-fade { animation: reveal-fade 0.35s ease backwards; }
 .sheet-backdrop { animation: reveal-fade 0.25s ease backwards; }
 .sheet-panel { animation: sheet-up 0.35s cubic-bezier(0.22, 0.9, 0.3, 1) backwards; }
+.badge-pop { animation: badge-pop 0.35s cubic-bezier(0.3, 1.6, 0.5, 1) backwards; }
+@keyframes badge-pop { from { transform: scale(0.3); } to { transform: scale(1); } }
 .bar-in { animation: bar-up 0.4s cubic-bezier(0.22, 0.9, 0.3, 1) backwards; }
 
 /* Layar pembuka */
