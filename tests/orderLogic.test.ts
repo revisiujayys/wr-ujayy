@@ -110,12 +110,32 @@ test('pesan WhatsApp memuat ringkasan dan URL ter-encode', () => {
     fulfillment: 'delivery', areaName: near.name, address: 'Jl. Uji 1', rtRw: null, landmark: null, note: 'Pedas',
     paymentMethod: 'cod', items: r.items, subtotal: r.subtotal, deliveryFee: r.deliveryFee, total: r.total,
   });
-  assert.match(msg, /UJ-TEST-0001/);
-  assert.match(msg, /1\. Mie Uji - Goreng\n/);
-  assert.match(msg, /\+ Telur\n\s+2 × Rp11\.000 = Rp22\.000/);
-  assert.match(msg, /\*Total: Rp27\.000\*/);
-  assert.match(msg, /WhatsApp: \+62 812-3456-789/);
+  assert.match(msg, /ID Pesanan : UJ-TEST-0001/);
+  assert.match(msg, /1\. Mie Uji \(2x\)\s+Rp22\.000/);
+  assert.match(msg, /│    Goreng\s+│/);
+  assert.match(msg, /│    \+ Telur\s+│/);
+  assert.match(msg, /TOTAL TAGIHAN\s+Rp27\.000/);
+  assert.match(msg, /WhatsApp\s+\+62 812-3456-789/);
+  assert.match(msg, /Pengambilan\s+Diantar/);
+  assert.match(msg, /Alamat\s+Jl\. Uji 1/);
   assert.doesNotMatch(msg, /Mohon kirim detail/); // COD: tanpa permintaan detail pembayaran
   assert.equal(buildWhatsAppUrl(null, msg), null);
-  assert.ok(buildWhatsAppUrl('628100000000', msg)!.startsWith('https://wa.me/628100000000?text=Halo'));
+  assert.ok(buildWhatsAppUrl('628100000000', msg)!.startsWith('https://wa.me/628100000000?text=%60%60%60'));
+});
+
+test('kotak WhatsApp: semua baris sama lebar, alamat panjang dibungkus, backtick dibersihkan', () => {
+  const r = priceOrder({ fulfillment: 'pickup', items: [{ productId: 'p-drink', variantId: 'v-a', quantity: 4 }] }, products, toppings, null);
+  const msg = buildWhatsAppMessage({
+    orderNumber: 'UJ-TEST-0002', customerName: 'Nama `Sangat` Panjang Sekali Sampai Melebihi Kotak', customerPhone: '628123456789',
+    fulfillment: 'delivery', areaName: 'Dekat', address: 'Jl. Contoh Panjang Sekali Nomor 123 Blok C Perumahan Indah Asri', rtRw: '01/02', landmark: null, note: null,
+    paymentMethod: 'qris_transfer', items: r.items, subtotal: r.subtotal, deliveryFee: 5000, total: r.subtotal + 5000,
+  });
+  const boxLines = msg.split('\n').filter((l) => /^[┌├│└]/.test(l));
+  assert.ok(boxLines.length > 10);
+  assert.equal(new Set(boxLines.map((l) => l.length)).size, 1, 'semua baris kotak harus sama lebar');
+  assert.ok(!msg.slice(3, -1).includes('`') || msg.startsWith('```'), 'backtick pengguna tidak boleh merusak blok');
+  assert.equal((msg.match(/`/g) ?? []).length, 6); // hanya pembuka dan penutup blok
+  assert.match(msg, /1\. Minuman Uji \(Rasa A\)\s+Rp16\.000/);
+  assert.match(msg, /│    4x\s+│/);
+  assert.match(msg, /Mohon kirim detail pembayarannya\. Terima kasih\.$/);
 });
