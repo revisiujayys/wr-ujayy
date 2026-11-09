@@ -2,17 +2,25 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { z } from 'zod';
 import { adminClient, guardPost, json, readBody, withinLimit } from './_lib/server.js';
 
-const Body = z.object({ query: z.string().trim().min(2).max(80) });
+const Body = z.union([
+  z.object({ query: z.string().trim().min(2).max(80) }),
+  z.object({ download: z.string().url().max(500) }),
+]);
 
-type PexelsPhoto = {
+type PixabayHit = {
   id: number;
-  url: string;
-  photographer: string;
-  src: { medium: string; large: string };
+  pageURL: string;
+  user: string;
+  previewURL: string;
+  webformatURL: string;
+  largeImageURL: string;
 };
 
-// Pencarian foto lewat API resmi Pexels (bukan scraping). Hanya untuk admin yang sedang login.
-// Kunci API Pexels disimpan di server (PEXELS_API_KEY) dan tidak pernah dikirim ke browser.
+const MAX_BYTES = 3_000_000;
+
+// Pencarian foto lewat API resmi Pixabay (bukan scraping). Hanya untuk admin yang sedang login.
+// Kunci API disimpan di server (PIXABAY_API_KEY) dan tidak pernah dikirim ke browser.
+// Foto diunduh lewat server lalu disalin ke penyimpanan sendiri (Pixabay melarang hotlink permanen).
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!guardPost(req, res)) return;
 
@@ -32,35 +40,52 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .maybeSingle();
     if (!adminRow) return json(res, 403, { error: 'Tidak diizinkan' });
 
-    if (!(await withinLimit(admin, 'img-search:' + userData.user.id, 60, 3600))) {
-      return json(res, 429, { error: 'Terlalu banyak pencarian. Coba lagi nanti.' });
-    }
-
-    const key = process.env.PEXELS_API_KEY;
-    if (!key) return json(res, 503, { error: 'Pencarian foto belum diaktifkan (PEXELS_API_KEY belum diatur di Vercel).' });
-
     const parsed = Body.safeParse(readBody(req));
     if (!parsed.success) return json(res, 400, { error: 'Tulis kata kunci pencarian (minimal 2 huruf)' });
 
-    const url = new URL('https://api.pexels.com/v1/search');
-    url.searchParams.set('query', parsed.data.query);
-    url.searchParams.set('per_page', '15');
-    url.searchParams.set('locale', 'id-ID');
+    const mode = 'download' in parsed.data ? 'dl' : 'search';
+    if (!(await withinLimit(admin, `img-${mode}:` + userData.user.id, 60, 3600))) {
+      return json(res, 429, { error: 'Terlalu banyak permintaan. Coba lagi nanti.' });
+    }
 
-    const upstream = await fetch(url, { headers: { Authorization: key } });
+    if ('download' in parsed.data) {
+      const target = new URL(parsed.data.download);
+      if (target.protocol !== 'https:' || !(target.hostname === 'pixabay.com' || target.hostname.endsWith('.pixabay.com'))) {
+        return json(res, 400, { error: 'Alamat foto tidak valid' });
+      }
+      const img = await fetch(target);
+      const type = img.headers.get('content-type') ?? '';
+      if (!img.ok || !type.startsWith('image/')) return json(res, 502, { error: 'Gagal mengunduh foto. Coba foto lain.' });
+      const buf = Buffer.from(await img.arrayBuffer());
+      if (buf.length > MAX_BYTES) return json(res, 413, { error: 'Foto terlalu besar. Coba foto lain.' });
+      return json(res, 200, { contentType: type, data: buf.toString('base64') });
+    }
+
+    const key = process.env.PIXABAY_API_KEY;
+    if (!key) return json(res, 503, { error: 'Pencarian foto belum diaktifkan (PIXABAY_API_KEY belum diatur di Vercel).' });
+
+    const url = new URL('https://pixabay.com/api/');
+    url.searchParams.set('key', key);
+    url.searchParams.set('q', parsed.data.query);
+    url.searchParams.set('image_type', 'photo');
+    url.searchParams.set('per_page', '15');
+    url.searchParams.set('safesearch', 'true');
+    url.searchParams.set('lang', 'id');
+
+    const upstream = await fetch(url);
     if (!upstream.ok) {
-      console.error('pexels failed:', upstream.status);
+      console.error('pixabay failed:', upstream.status);
       return json(res, 502, { error: 'Layanan foto sedang bermasalah. Coba lagi nanti.' });
     }
-    const data = (await upstream.json()) as { photos?: PexelsPhoto[] };
+    const data = (await upstream.json()) as { hits?: PixabayHit[] };
 
     return json(res, 200, {
-      photos: (data.photos ?? []).map((p) => ({
+      photos: (data.hits ?? []).map((p) => ({
         id: p.id,
-        thumb: p.src.medium,
-        image: p.src.large,
-        photographer: p.photographer,
-        pageUrl: p.url,
+        thumb: p.webformatURL,
+        image: p.largeImageURL,
+        photographer: p.user,
+        pageUrl: p.pageURL,
       })),
     });
   } catch (error) {

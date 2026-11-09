@@ -7,7 +7,7 @@ import { Btn, ErrorNote } from './ui';
 
 type Photo = { id: number; thumb: string; image: string; photographer: string; pageUrl: string };
 
-// Cari foto produk lewat Pexels (API resmi). Foto yang dipilih disalin ke penyimpanan sendiri.
+// Cari foto produk lewat Pixabay (API resmi). Foto yang dipilih disalin ke penyimpanan sendiri.
 export function ImageSearch({
   initialQuery,
   onPick,
@@ -46,15 +46,30 @@ export function ImageSearch({
   async function pick(photo: Photo) {
     setBusy(true);
     setError(null);
+    const { data } = await supabase.auth.getSession();
+    const token = data.session?.access_token;
+    if (!token) {
+      setError('Sesi habis, silakan login ulang');
+      setBusy(false);
+      return;
+    }
+    const res = await postJson<{ contentType: string; data: string }>(
+      '/api/image-search',
+      { download: photo.image },
+      { Authorization: `Bearer ${token}` },
+    );
+    if (!res.ok) {
+      setError(res.error);
+      setBusy(false);
+      return;
+    }
     try {
-      const blob = await (await fetch(photo.image)).blob();
-      const file = new File([blob], 'pexels.jpg', { type: blob.type || 'image/jpeg' });
-      onPick(await uploadImage(file, 'products', 'pexels-'));
+      const blob = await (await fetch(`data:${res.data.contentType};base64,${res.data.data}`)).blob();
+      const file = new File([blob], 'pixabay.jpg', { type: res.data.contentType });
+      onPick(await uploadImage(file, 'products', 'pixabay-'));
       onClose();
-    } catch {
-      // Jika penyalinan gagal, pakai tautan langsung dari Pexels.
-      onPick(photo.image);
-      onClose();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Gagal menyimpan foto');
     }
     setBusy(false);
   }
@@ -100,8 +115,8 @@ export function ImageSearch({
         )}
         <p className="text-xs text-stone-400">
           Foto dari{' '}
-          <a href="https://www.pexels.com" target="_blank" rel="noopener noreferrer" className="underline">
-            Pexels
+          <a href="https://pixabay.com" target="_blank" rel="noopener noreferrer" className="underline">
+            Pixabay
           </a>
           . Foto hanya contoh, pastikan sesuai dengan produk Anda.
         </p>

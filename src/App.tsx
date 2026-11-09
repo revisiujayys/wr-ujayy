@@ -202,11 +202,11 @@ export default function App() {
                 Buka di Google Maps
               </a>
             )}
-            {data.products.some((p) => p.imageUrl?.includes('pexels')) && (
+            {data.products.some((p) => p.imageUrl?.includes('pixabay')) && (
               <p className="mt-4 text-xs text-stone-400">
                 Sebagian foto dari{' '}
-                <a href="https://www.pexels.com" target="_blank" rel="noopener noreferrer" className="underline">
-                  Pexels
+                <a href="https://pixabay.com" target="_blank" rel="noopener noreferrer" className="underline">
+                  Pixabay
                 </a>
               </p>
             )}
