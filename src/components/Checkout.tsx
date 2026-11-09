@@ -166,9 +166,8 @@ export function Checkout({ catalog, items, subtotal, onBack, onSuccess }: Props)
       )}
 
       {step === 'form' && (
-        <>
-          {summary}
-
+        <div className="grid items-start gap-4 md:grid-cols-[minmax(0,1fr)_20rem]">
+          <div className="space-y-4">
           <section className="space-y-3 rounded-2xl border border-stone-200 bg-white p-4">
             <Label text="Nama penerima">
               <input className={inputCls} value={name} onChange={(e) => setName(e.target.value)} maxLength={80} autoComplete="name" />
@@ -266,26 +265,32 @@ export function Checkout({ catalog, items, subtotal, onBack, onSuccess }: Props)
               <textarea className={inputCls} rows={2} value={note} onChange={(e) => setNote(e.target.value)} maxLength={300} />
             </Label>
           </section>
+          </div>
 
-          {error && (
-            <p role="alert" className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">
-              {error}
-            </p>
-          )}
+          <div className="space-y-4 md:sticky md:top-20">
+            {summary}
 
-          <button
-            type="button"
-            disabled={!isOpen}
-            onClick={goReview}
-            className="w-full rounded-full bg-stone-900 py-3 text-sm font-semibold text-white disabled:bg-stone-300"
-          >
-            Periksa pesanan
-          </button>
-        </>
+            {error && (
+              <p role="alert" className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">
+                {error}
+              </p>
+            )}
+
+            <button
+              type="button"
+              disabled={!isOpen}
+              onClick={goReview}
+              className="w-full rounded-full bg-stone-900 py-3 text-sm font-semibold text-white disabled:bg-stone-300"
+            >
+              Periksa pesanan
+            </button>
+          </div>
+        </div>
       )}
 
       {step === 'review' && (
         <>
+          <div className="grid items-start gap-4 md:grid-cols-2">
           {summary}
 
           <section className="space-y-1 rounded-2xl border border-stone-200 bg-white p-4 text-sm">
@@ -331,6 +336,7 @@ export function Checkout({ catalog, items, subtotal, onBack, onSuccess }: Props)
               </p>
             )}
           </section>
+          </div>
 
           <p className="text-xs text-stone-500">
             Pembatalan tidak bisa dilakukan lewat website. Hubungi admin lewat WhatsApp jika ingin membatalkan.

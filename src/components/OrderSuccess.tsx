@@ -3,22 +3,24 @@ import type { OrderResult } from './Checkout';
 
 export function OrderSuccess({ result, onDone }: { result: OrderResult; onDone: () => void }) {
   return (
-    <div className="space-y-4 text-center">
+    <div className="mx-auto max-w-md space-y-4 text-center">
       <div className="mx-auto grid size-14 place-items-center rounded-full bg-emerald-100 text-2xl text-emerald-700" aria-hidden="true">
         ✓
       </div>
       <h1 className="text-xl font-bold">Pesanan diterima</h1>
 
-      <section className="rounded-2xl border border-stone-200 bg-white p-4">
-        <p className="text-xs text-stone-500">Nomor pesanan</p>
-        <p className="text-lg font-bold tracking-wide">{result.orderNumber}</p>
-        <p className="mt-3 text-xs text-stone-500">Total pembayaran</p>
-        <p className="text-2xl font-extrabold text-brand">{rupiah(result.total)}</p>
-        {result.deliveryFee > 0 && (
-          <p className="mt-1 text-xs text-stone-500">
-            Termasuk ongkir {rupiah(result.deliveryFee)}
-          </p>
-        )}
+      <section className="grid grid-cols-2 divide-x divide-stone-200 rounded-2xl border border-stone-200 bg-white p-4">
+        <div className="px-2">
+          <p className="text-xs text-stone-500">Nomor pesanan</p>
+          <p className="mt-1 break-all text-base font-bold tracking-wide">{result.orderNumber}</p>
+        </div>
+        <div className="px-2">
+          <p className="text-xs text-stone-500">Total pembayaran</p>
+          <p className="mt-1 text-xl font-extrabold text-brand">{rupiah(result.total)}</p>
+          {result.deliveryFee > 0 && (
+            <p className="text-xs text-stone-500">Termasuk ongkir {rupiah(result.deliveryFee)}</p>
+          )}
+        </div>
       </section>
 
       <p className="text-sm text-stone-600">

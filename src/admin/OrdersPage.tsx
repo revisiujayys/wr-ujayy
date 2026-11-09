@@ -107,6 +107,7 @@ export function OrdersPage() {
       {loading && <p className="py-8 text-center text-sm text-stone-500">Memuat…</p>}
       {!loading && shown.length === 0 && <p className="py-8 text-center text-sm text-stone-500">Belum ada pesanan.</p>}
 
+      <div className="grid items-start gap-3 md:grid-cols-2">
       {shown.map((o) => (
         <Card key={o.id}>
           <div className="flex items-start justify-between gap-3">
@@ -179,6 +180,7 @@ export function OrdersPage() {
           </div>
         </Card>
       ))}
+      </div>
     </div>
   );
 }

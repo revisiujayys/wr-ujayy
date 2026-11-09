@@ -3,7 +3,7 @@ import { Sheet } from '../components/Sheet';
 import { rupiah } from '../lib/format';
 import { uploadImage } from '../lib/images';
 import { supabase } from '../lib/supabase';
-import { Btn, Card, ErrorNote, errorText, Field, Toggle } from './ui';
+import { Btn, ErrorNote, errorText, Field, Toggle } from './ui';
 
 type Category = { id: string; name: string };
 type Variant = { id: string; name: string; is_available: boolean; sort_order: number };
@@ -340,27 +340,30 @@ export function ProductsPage() {
         <p className="py-8 text-center text-sm text-stone-500">Belum ada produk. Tekan “+ Produk” untuk menambah.</p>
       )}
 
-      {shown.map((p) => (
-        <Card key={p.id} className="flex items-center gap-3 p-3">
-          <button type="button" onClick={() => setEditing(p)} className="flex min-w-0 flex-1 items-center gap-3 text-left">
-            <div className="size-14 shrink-0 overflow-hidden rounded-xl bg-stone-100">
-              {p.image_url && <img src={p.image_url} alt="" loading="lazy" className="size-full object-cover" />}
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
+        {shown.map((p) => (
+          <article key={p.id} className="flex flex-col overflow-hidden rounded-2xl border border-stone-200 bg-white">
+            <button type="button" onClick={() => setEditing(p)} className="text-left">
+              <div className="aspect-square bg-stone-100">
+                {p.image_url && <img src={p.image_url} alt="" loading="lazy" className="size-full object-cover" />}
+              </div>
+              <div className="p-3 pb-2">
+                <p className="line-clamp-2 min-h-10 text-sm font-medium leading-5">{p.name}</p>
+                <p className="text-sm font-semibold text-brand">{rupiah(p.base_price)}</p>
+                <p className="truncate text-xs text-stone-500">
+                  {categoryName(p.category_id)}
+                  {p.product_variants.length > 0 && ` · ${p.product_variants.length} varian`}
+                </p>
+                {!p.is_active && <p className="text-xs font-medium text-amber-700">Disembunyikan</p>}
+              </div>
+            </button>
+            <div className="mt-auto flex items-center justify-between border-t border-stone-100 px-3 py-2">
+              <span className="text-xs text-stone-600">{p.is_available ? 'Stok ada' : 'Habis'}</span>
+              <Toggle checked={p.is_available} onChange={(v) => void quickToggle(p, v)} label={`Stok ${p.name}`} />
             </div>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-medium">{p.name}</p>
-              <p className="text-xs text-stone-500">
-                {categoryName(p.category_id)} · {rupiah(p.base_price)}
-                {p.product_variants.length > 0 && ` · ${p.product_variants.length} varian`}
-              </p>
-              {!p.is_active && <p className="text-xs font-medium text-amber-700">Disembunyikan</p>}
-            </div>
-          </button>
-          <div className="flex flex-col items-center gap-1">
-            <Toggle checked={p.is_available} onChange={(v) => void quickToggle(p, v)} label={`Stok ${p.name}`} />
-            <span className="text-[10px] text-stone-500">{p.is_available ? 'Ada' : 'Habis'}</span>
-          </div>
-        </Card>
-      ))}
+          </article>
+        ))}
+      </div>
 
       {editing && (
         <Editor

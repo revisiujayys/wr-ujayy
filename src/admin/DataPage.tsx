@@ -170,7 +170,7 @@ function MasterList({ title, hint, table, cols, flagKey, flagLabel }: ListProps)
 
 export function DataPage() {
   return (
-    <div className="space-y-4">
+    <div className="grid items-start gap-4 lg:grid-cols-3">
       <MasterList
         title="Kategori"
         hint="Kategori yang masih punya produk tidak bisa dihapus; matikan saja agar tidak tampil."

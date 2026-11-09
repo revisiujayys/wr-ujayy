@@ -144,6 +144,7 @@ export function ShopPage() {
         <Toggle checked={settings.is_open} onChange={(v) => void toggleOpen(v)} label="Toko buka" />
       </Card>
 
+      <div className="grid items-start gap-4 md:grid-cols-2">
       <Card className="space-y-3">
         <h2 className="text-base font-semibold">Info toko</h2>
         <Field
@@ -226,6 +227,7 @@ export function ShopPage() {
           Simpan data pembayaran
         </Btn>
       </Card>
+      </div>
     </div>
   );
 }

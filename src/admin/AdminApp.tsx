@@ -127,7 +127,7 @@ export default function AdminApp() {
   return (
     <div className="min-h-dvh pb-24">
       <header className="sticky top-0 z-10 border-b border-stone-200 bg-white/90 backdrop-blur">
-        <div className="mx-auto flex h-14 max-w-3xl items-center justify-between px-4">
+        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
           <Logo />
           <Btn variant="ghost" onClick={() => void logout()} className="px-3 py-1.5">
             Keluar
@@ -135,7 +135,7 @@ export default function AdminApp() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-3xl space-y-4 px-4 py-4">
+      <main className="mx-auto max-w-5xl space-y-4 px-4 py-4">
         {tab === 'orders' && <OrdersPage />}
         {tab === 'products' && <ProductsPage />}
         {tab === 'data' && <DataPage />}
@@ -144,7 +144,7 @@ export default function AdminApp() {
       </main>
 
       <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-stone-200 bg-white" aria-label="Menu admin">
-        <div className="mx-auto grid max-w-3xl grid-cols-5">
+        <div className="mx-auto grid max-w-5xl grid-cols-5">
           {TABS.map((t) => (
             <button
               key={t.id}

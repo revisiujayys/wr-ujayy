@@ -106,17 +106,17 @@ export function ReportPage() {
           <p className="mb-3 text-xs text-stone-500">
             Omzet hanya dari pesanan berstatus “Sudah Dibayar” (termasuk ongkir), dihitung menurut tanggal ditandai dibayar. Waktu WIB.
           </p>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
             <Stat label="Omzet hari ini" value={rupiah(finance.revenue_today)} sub={`${finance.paid_today} pesanan`} />
             <Stat label="Omzet 7 hari" value={rupiah(finance.revenue_7d)} sub={`${finance.paid_7d} pesanan`} />
             <Stat label="Omzet bulan ini" value={rupiah(finance.revenue_month)} sub={`${finance.paid_month} pesanan`} />
           </div>
-          <div className="mt-2 grid grid-cols-3 gap-2">
+          <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
             <Stat label="Pengeluaran hari ini" value={rupiah(finance.expense_today)} />
             <Stat label="Pengeluaran 7 hari" value={rupiah(finance.expense_7d)} />
             <Stat label="Pengeluaran bulan ini" value={rupiah(finance.expense_month)} />
           </div>
-          <div className="mt-2 grid grid-cols-3 gap-2">
+          <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
             <Stat label="Estimasi selisih hari ini" value={diff(finance.revenue_today, finance.expense_today)} />
             <Stat label="Estimasi selisih 7 hari" value={diff(finance.revenue_7d, finance.expense_7d)} />
             <Stat label="Estimasi selisih bulan ini" value={diff(finance.revenue_month, finance.expense_month)} />
@@ -131,6 +131,7 @@ export function ReportPage() {
         </Card>
       )}
 
+      <div className="grid items-start gap-4 md:grid-cols-2">
       <Card className="space-y-3">
         <h2 className="text-base font-semibold">Catat pengeluaran</h2>
         <Field label="Nama" value={name} onChange={(e) => setName(e.target.value)} maxLength={100} />
@@ -199,6 +200,7 @@ export function ReportPage() {
           </div>
         </Card>
       )}
+      </div>
     </div>
   );
 }
