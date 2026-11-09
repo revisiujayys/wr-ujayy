@@ -10,7 +10,7 @@ import { ProductSheet } from './components/ProductSheet';
 import { Splash } from './components/Splash';
 import { WelcomeBanner } from './components/WelcomeBanner';
 import { priceCart, useCart, type AddInput } from './lib/cart';
-import { formatTime, rupiah } from './lib/format';
+import { formatTime } from './lib/format';
 import { preloadImages } from './lib/preload';
 import { useDailyTheme } from './lib/theme';
 import { trackVisit } from './lib/track';
@@ -124,7 +124,7 @@ export default function App() {
   const ready = minDone && (hardCap || (state.status !== 'loading' && assetsReady && themeLoaded));
 
   const app = (
-    <div className="min-h-dvh pb-24">
+    <div className="min-h-dvh pb-8">
       <header className="sticky top-0 z-10 border-b border-stone-200 bg-white/90 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
           <Logo />
@@ -139,7 +139,9 @@ export default function App() {
             </span>
           )}
         </div>
-        <InfoStrip />
+        <InfoStrip
+          cart={data ? { count: cart.count, disabled: view !== 'catalog', onOpen: () => setCartOpen(true) } : undefined}
+        />
       </header>
 
       <main key={view} className="reveal-fade mx-auto max-w-5xl space-y-4 px-4 py-4">
@@ -243,18 +245,6 @@ export default function App() {
         </footer>
       )}
 
-      {data && view === 'catalog' && cart.count > 0 && priced && (
-        <div className="bar-in fixed inset-x-0 bottom-0 z-20 p-4">
-          <button
-            type="button"
-            onClick={() => setCartOpen(true)}
-            className="mx-auto flex w-full max-w-lg items-center justify-between rounded-full bg-stone-900 px-5 py-3 text-sm font-semibold text-white shadow-lg"
-          >
-            <span>Keranjang · {cart.count} item</span>
-            <span>{rupiah(priced.subtotal)}</span>
-          </button>
-        </div>
-      )}
 
       {data && sheetProduct && (
         <ProductSheet
