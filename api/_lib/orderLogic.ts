@@ -181,6 +181,9 @@ const DIVIDER = '────────────────────';
 // Buang karakter pemicu format WhatsApp (tebal, miring, coret, kode) dan rapikan spasi/baris baru.
 const clean = (s: string) => s.replace(/[*_~`]/g, '').replace(/\s+/g, ' ').trim();
 
+// Baris dalam blok kutipan WhatsApp ("> "), label tebal. Baris berurutan menyatu jadi satu blok.
+const kv = (label: string, value: string) => `> *${label}:* ${value}`;
+
 export function buildWhatsAppMessage(o: OrderSummary): string {
   const lines: string[] = [];
   lines.push('*KONFIRMASI PESANAN*', DIVIDER, `ID Pesanan: *${o.orderNumber}*`, DIVIDER);
@@ -193,23 +196,23 @@ export function buildWhatsAppMessage(o: OrderSummary): string {
   });
 
   lines.push(DIVIDER, '*RINCIAN BIAYA*');
-  lines.push(`Subtotal: ${rupiah(o.subtotal)}`);
-  lines.push(`Ongkir: ${o.deliveryFee === 0 ? 'Gratis' : rupiah(o.deliveryFee)}`);
-  lines.push(`Pengambilan: ${o.fulfillment === 'delivery' ? 'Diantar' : 'Ambil di warung'}`);
-  lines.push(`Pembayaran: ${o.paymentMethod === 'cod' ? 'COD (tunai)' : 'QRIS / Transfer'}`);
+  lines.push(kv('Subtotal', rupiah(o.subtotal)));
+  lines.push(kv('Ongkir', o.deliveryFee === 0 ? 'Gratis' : rupiah(o.deliveryFee)));
+  lines.push(kv('Pengambilan', o.fulfillment === 'delivery' ? 'Diantar' : 'Ambil di warung'));
+  lines.push(kv('Pembayaran', o.paymentMethod === 'cod' ? 'COD (tunai)' : 'QRIS / Transfer'));
 
   lines.push(DIVIDER, `*TOTAL TAGIHAN: ${rupiah(o.total)}*`, DIVIDER);
 
   lines.push('*DATA PEMESAN*');
-  lines.push(`Nama: ${clean(o.customerName)}`);
-  lines.push(`WhatsApp: ${displayPhone(o.customerPhone)}`);
+  lines.push(kv('Nama', clean(o.customerName)));
+  lines.push(kv('WhatsApp', displayPhone(o.customerPhone)));
   if (o.fulfillment === 'delivery') {
-    lines.push(`Desa: ${clean(o.areaName ?? '-')}`);
-    if (o.address) lines.push(`Alamat: ${clean(o.address)}`);
-    if (o.rtRw) lines.push(`RT/RW: ${clean(o.rtRw)}`);
-    if (o.landmark) lines.push(`Patokan: ${clean(o.landmark)}`);
+    lines.push(kv('Desa', clean(o.areaName ?? '-')));
+    if (o.address) lines.push(kv('Alamat', clean(o.address)));
+    if (o.rtRw) lines.push(kv('RT/RW', clean(o.rtRw)));
+    if (o.landmark) lines.push(kv('Patokan', clean(o.landmark)));
   }
-  if (o.note) lines.push(`Catatan: ${clean(o.note)}`);
+  if (o.note) lines.push(kv('Catatan', clean(o.note)));
   lines.push(DIVIDER);
 
   lines.push(

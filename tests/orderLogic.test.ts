@@ -115,10 +115,10 @@ test('pesan WhatsApp memuat ringkasan dan URL ter-encode', () => {
   assert.match(msg, /\n    Goreng\n/);
   assert.match(msg, /\n    \+ Telur\n/);
   assert.match(msg, /\*TOTAL TAGIHAN: Rp27\.000\*/);
-  assert.match(msg, /WhatsApp: \+62 812-3456-789/);
-  assert.match(msg, /Pengambilan: Diantar/);
-  assert.match(msg, /Alamat: Jl\. Uji 1/);
-  assert.match(msg, /Catatan: Pedas/);
+  assert.match(msg, /> \*WhatsApp:\* \+62 812-3456-789/);
+  assert.match(msg, /> \*Pengambilan:\* Diantar/);
+  assert.match(msg, /> \*Alamat:\* Jl\. Uji 1/);
+  assert.match(msg, /> \*Catatan:\* Pedas/);
   assert.doesNotMatch(msg, /Mohon kirim detail/); // COD: tanpa permintaan detail pembayaran
   assert.equal(buildWhatsAppUrl(null, msg), null);
   assert.ok(buildWhatsAppUrl('628100000000', msg)!.startsWith('https://wa.me/628100000000?text=*KONFIRMASI'));
@@ -132,9 +132,9 @@ test('pesan WhatsApp: tanpa kotak/monospace, teks pengguna dibersihkan dari form
     paymentMethod: 'qris_transfer', items: r.items, subtotal: r.subtotal, deliveryFee: 0, total: r.subtotal,
   });
   assert.doesNotMatch(msg, /[│┌┐└┘├┤`]/); // tidak bergantung pada lebar karakter
-  assert.match(msg, /Nama: Reza ganteng\n/);
-  assert.match(msg, /Catatan: baris1 baris2 kode\n/);
+  assert.match(msg, /> \*Nama:\* Reza ganteng\n/);
+  assert.match(msg, /> \*Catatan:\* baris1 baris2 kode\n/);
   assert.match(msg, /1\. Minuman Uji \(Rasa A\) \(4x\) — Rp16\.000/);
-  assert.match(msg, /Pengambilan: Ambil di warung/);
+  assert.match(msg, /> \*Pengambilan:\* Ambil di warung/);
   assert.match(msg, /Mohon kirim detail pembayarannya\. Terima kasih\.$/);
 });
