@@ -32,6 +32,13 @@ body {
   to { background-position: -60% 0; }
 }
 
+.welcome-drop,
+.welcome-pop {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
 .welcome-drop {
   animation: drop-in 0.8s cubic-bezier(0.22, 0.9, 0.3, 1) both;
 }

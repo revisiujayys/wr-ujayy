@@ -21,11 +21,12 @@ async function prepareImage(file: File, maxSize = 900): Promise<Blob> {
 }
 
 // Mengembalikan URL publik gambar yang tersimpan di Supabase Storage.
-export async function uploadImage(file: File, folder: 'products' | 'qris'): Promise<string> {
+// `prefix` menandai asal foto (mis. "pexels-") agar kredit sumber bisa ditampilkan di katalog.
+export async function uploadImage(file: File, folder: 'products' | 'qris', prefix = ''): Promise<string> {
   if (!file.type.startsWith('image/')) throw new Error('Pilih file gambar (JPG, PNG, atau WebP)');
   const blob = await prepareImage(file);
   const ext = blob.type === 'image/webp' ? 'webp' : blob.type === 'image/png' ? 'png' : 'jpg';
-  const path = `${folder}/${crypto.randomUUID()}.${ext}`;
+  const path = `${folder}/${prefix}${crypto.randomUUID()}.${ext}`;
   const { error } = await supabase.storage.from(BUCKET).upload(path, blob, {
     contentType: blob.type,
     cacheControl: '31536000',
