@@ -15,21 +15,22 @@ export function InfoStrip() {
         else if (!error && typeof data === 'string') setVisitors(Number(data));
       });
     }, 1500);
-    return () => window.clearTimeout(id);
-  }, []);
+    const cells = [
+    { label: 'Tanggal', value: date, extra: '' },
+    { label: 'Jam', value: `${time} WIB`, extra: 'tabular-nums' },
+    { label: 'Pengunjung', value: visitors === null ? '–' : visitors.toLocaleString('id-ID'), extra: 'tabular-nums' },
+  ];
 
   return (
-    <div className="border-t border-brand/10 bg-brand-soft/70 transition-colors duration-500">
-      <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-1 text-[11px] text-stone-600">
-        <time className="truncate" aria-label="Waktu WIB saat ini">
-          {date} · <span className="font-semibold tabular-nums text-stone-800">{time}</span> WIB
-        </time>
-        {visitors !== null && (
-          <span className="shrink-0" title="Total pengunjung unik">
-            👥 <span className="font-semibold tabular-nums text-stone-800">{visitors.toLocaleString('id-ID')}</span> pengunjung
-          </span>
-        )}
-      </div>
+    <div className="border-t border-stone-200/70 bg-brand-soft/60 transition-colors duration-500">
+      <dl className="mx-auto grid max-w-5xl grid-cols-[1.4fr_1fr_0.8fr] divide-x divide-stone-200/80 px-1 py-1.5">
+        {cells.map((c) => (
+          <div key={c.label} className="min-w-0 px-3 text-center">
+            <dt className="text-[10px] font-medium uppercase tracking-wider text-stone-500">{c.label}</dt>
+            <dd className={`truncate text-xs font-semibold text-stone-800 ${c.extra}`}>{c.value}</dd>
+          </div>
+        ))}
+      </dl>
     </div>
   );
 }
