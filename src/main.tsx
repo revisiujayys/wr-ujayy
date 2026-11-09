@@ -1,6 +1,7 @@
 import { lazy, StrictMode, Suspense } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
+import { Splash } from './components/Splash';
 import { CartProvider } from './lib/cart';
 import './index.css';
 
@@ -11,7 +12,7 @@ const isAdminRoute = window.location.pathname.startsWith('/admin');
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     {isAdminRoute ? (
-      <Suspense fallback={null}>
+      <Suspense fallback={<Splash />}>
         <AdminApp />
       </Suspense>
     ) : (

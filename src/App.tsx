@@ -2,13 +2,16 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { CartSheet } from './components/CartSheet';
 import { CategoryTabs } from './components/CategoryTabs';
 import { Checkout, type OrderResult } from './components/Checkout';
+import { InfoStrip } from './components/InfoStrip';
 import { Logo } from './components/Logo';
 import { OrderSuccess } from './components/OrderSuccess';
 import { ProductCard } from './components/ProductCard';
 import { ProductSheet } from './components/ProductSheet';
+import { Splash } from './components/Splash';
 import { WelcomeBanner } from './components/WelcomeBanner';
 import { priceCart, useCart, type AddInput } from './lib/cart';
 import { formatTime, rupiah } from './lib/format';
+import { useDailyTheme } from './lib/theme';
 import { trackVisit } from './lib/track';
 import type { CatalogProduct } from './lib/types';
 import { useCatalog } from './lib/useCatalog';
@@ -45,6 +48,14 @@ export default function App() {
   const [lastOrder, setLastOrder] = useState<OrderResult | null>(loadLastOrder);
   const [view, setView] = useState<View>(lastOrder ? 'success' : 'catalog');
   const tracked = useRef(false);
+  const [minDone, setMinDone] = useState(false);
+  const [splashGone, setSplashGone] = useState(false);
+  useDailyTheme();
+
+  useEffect(() => {
+    const id = window.setTimeout(() => setMinDone(true), 1300);
+    return () => window.clearTimeout(id);
+  }, []);
 
   useEffect(() => {
     if (tracked.current) return;
@@ -88,7 +99,9 @@ export default function App() {
     setView('catalog');
   }
 
-  return (
+  const ready = state.status !== 'loading' && minDone;
+
+  const app = (
     <div className="min-h-dvh pb-24">
       <header className="sticky top-0 z-10 border-b border-stone-200 bg-white/90 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
@@ -104,9 +117,10 @@ export default function App() {
             </span>
           )}
         </div>
+        <InfoStrip />
       </header>
 
-      <main className="mx-auto max-w-5xl space-y-4 px-4 py-4">
+      <main key={view} className="reveal-fade mx-auto max-w-5xl space-y-4 px-4 py-4">
         {view === 'success' && lastOrder && <OrderSuccess result={lastOrder} onDone={leaveSuccess} />}
 
         {view === 'checkout' && data && priced && (
@@ -167,8 +181,8 @@ export default function App() {
 
                 {data && visible.length > 0 && (
                   <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
-                    {visible.map((p) => (
-                      <ProductCard key={p.id} product={p} onAdd={handleAdd} />
+                    {visible.map((p, i) => (
+                      <ProductCard key={p.id} product={p} index={i} onAdd={handleAdd} />
                     ))}
                   </div>
                 )}
@@ -202,21 +216,13 @@ export default function App() {
                 Buka di Google Maps
               </a>
             )}
-            {data.products.some((p) => p.imageUrl?.includes('pixabay')) && (
-              <p className="mt-4 text-xs text-stone-400">
-                Sebagian foto dari{' '}
-                <a href="https://pixabay.com" target="_blank" rel="noopener noreferrer" className="underline">
-                  Pixabay
-                </a>
-              </p>
-            )}
-            <p className="mt-2 text-xs text-stone-400">© Wr. Ujayy</p>
+            <p className="mt-4 text-xs text-stone-400">© Wr. Ujayy</p>
           </div>
         </footer>
       )}
 
       {data && view === 'catalog' && cart.count > 0 && priced && (
-        <div className="fixed inset-x-0 bottom-0 z-20 p-4">
+        <div className="bar-in fixed inset-x-0 bottom-0 z-20 p-4">
           <button
             type="button"
             onClick={() => setCartOpen(true)}
@@ -252,5 +258,12 @@ export default function App() {
         />
       )}
     </div>
+  );
+
+  return (
+    <>
+      {!splashGone && <Splash leaving={ready} onGone={() => setSplashGone(true)} />}
+      {ready && app}
+    </>
   );
 }

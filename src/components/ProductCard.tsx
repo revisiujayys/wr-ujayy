@@ -1,10 +1,21 @@
 import { rupiah } from '../lib/format';
 import type { CatalogProduct } from '../lib/types';
 
-export function ProductCard({ product, onAdd }: { product: CatalogProduct; onAdd: (p: CatalogProduct) => void }) {
+export function ProductCard({
+  product,
+  index = 0,
+  onAdd,
+}: {
+  product: CatalogProduct;
+  index?: number;
+  onAdd: (p: CatalogProduct) => void;
+}) {
   const soldOut = !product.available;
   return (
-    <article className="flex flex-col overflow-hidden rounded-2xl border border-stone-200 bg-white">
+    <article
+      className="reveal flex flex-col overflow-hidden rounded-2xl border border-stone-200 bg-white transition-shadow duration-300 hover:shadow-md"
+      style={{ animationDelay: `${Math.min(index, 12) * 45}ms` }}
+    >
       <div className="relative aspect-square bg-stone-100">
         {product.imageUrl ? (
           <img

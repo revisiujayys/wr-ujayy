@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { InfoStrip } from '../components/InfoStrip';
 import { Logo } from '../components/Logo';
+import { Splash } from '../components/Splash';
 import { postJson } from '../lib/api';
 import { supabase } from '../lib/supabase';
+import { useDailyTheme } from '../lib/theme';
 import { DataPage } from './DataPage';
 import { OrdersPage } from './OrdersPage';
 import { ProductsPage } from './ProductsPage';
@@ -86,6 +89,7 @@ function Login({ onDone }: { onDone: () => void }) {
 export default function AdminApp() {
   const [phase, setPhase] = useState<Phase>('checking');
   const [tab, setTab] = useState<Tab>('orders');
+  useDailyTheme();
 
   useEffect(() => {
     document.title = 'Admin · Wr. Ujayy';
@@ -121,7 +125,7 @@ export default function AdminApp() {
     setPhase('login');
   }
 
-  if (phase === 'checking') return <div className="grid min-h-dvh place-items-center text-sm text-stone-500">Memuat…</div>;
+  if (phase === 'checking') return <Splash />;
   if (phase === 'login') return <Login onDone={() => void check()} />;
 
   return (
@@ -133,9 +137,10 @@ export default function AdminApp() {
             Keluar
           </Btn>
         </div>
+        <InfoStrip />
       </header>
 
-      <main className="mx-auto max-w-5xl space-y-4 px-4 py-4">
+      <main key={tab} className="reveal-fade mx-auto max-w-5xl space-y-4 px-4 py-4">
         {tab === 'orders' && <OrdersPage />}
         {tab === 'products' && <ProductsPage />}
         {tab === 'data' && <DataPage />}

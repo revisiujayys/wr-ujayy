@@ -3,12 +3,125 @@
 @theme {
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --color-brand: #c2410c;
+  --color-brand-soft: #fff7ed;
 }
 
+/* Tema harian: hanya mengganti warna merek + warna latar halaman. Diatur admin per hari (WIB). */
+:root { --page-bg: #fafaf9; }
+:root[data-theme='hijau']  { --color-brand: #15803d; --color-brand-soft: #f0fdf4; --page-bg: #f6faf6; }
+:root[data-theme='biru']   { --color-brand: #0369a1; --color-brand-soft: #f0f9ff; --page-bg: #f5f9fc; }
+:root[data-theme='ungu']   { --color-brand: #7e22ce; --color-brand-soft: #faf5ff; --page-bg: #f9f6fc; }
+:root[data-theme='merah']  { --color-brand: #b91c1c; --color-brand-soft: #fef2f2; --page-bg: #fcf6f6; }
+:root[data-theme='pink']   { --color-brand: #be185d; --color-brand-soft: #fdf2f8; --page-bg: #fcf5f9; }
+:root[data-theme='kuning'] { --color-brand: #a16207; --color-brand-soft: #fefce8; --page-bg: #fbfaf2; }
+:root[data-theme='grafit'] { --color-brand: #44403c; --color-brand-soft: #f5f5f4; --page-bg: #f6f5f4; }
+
+html { scroll-behavior: smooth; }
+
 body {
-  background-color: var(--color-stone-50);
+  min-height: 100dvh;
+  background-color: var(--page-bg);
+  background-image: linear-gradient(180deg, var(--color-brand-soft) 0, transparent 360px);
+  background-repeat: no-repeat;
   color: var(--color-stone-900);
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.6s ease;
+}
+
+/* Interaksi halus: tombol & tautan berubah warna lembut dan sedikit mengecil saat ditekan. */
+button, a, input, select, textarea {
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease,
+    box-shadow 0.2s ease, transform 0.15s ease;
+}
+button:not(:disabled):not([data-nopress]):active { transform: scale(0.97); }
+input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-brand) 18%, transparent); }
+
+@keyframes reveal-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes reveal-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes sheet-up {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes bar-up {
+  from { opacity: 0; transform: translateY(100%); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.reveal { animation: reveal-up 0.5s cubic-bezier(0.22, 0.9, 0.3, 1) both; }
+.reveal-fade { animation: reveal-fade 0.35s ease both; }
+.sheet-backdrop { animation: reveal-fade 0.25s ease both; }
+.sheet-panel { animation: sheet-up 0.35s cubic-bezier(0.22, 0.9, 0.3, 1) both; }
+.bar-in { animation: bar-up 0.4s cubic-bezier(0.22, 0.9, 0.3, 1) both; }
+
+/* Layar pembuka */
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--color-brand-soft), #ffffff 45%, var(--color-brand-soft));
+  background-size: 200% 200%;
+  animation: reveal-fade 0.3s ease both, splash-bg 6s ease-in-out infinite;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.splash-leave { opacity: 0; transform: scale(1.04); pointer-events: none; }
+@keyframes splash-bg {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+.splash-blob {
+  position: absolute;
+  border-radius: 9999px;
+  background: var(--color-brand);
+  opacity: 0.12;
+  filter: blur(40px);
+  animation: blob 7s ease-in-out infinite;
+}
+.splash-blob-a { width: 18rem; height: 18rem; top: -4rem; left: -5rem; }
+.splash-blob-b { width: 22rem; height: 22rem; bottom: -6rem; right: -6rem; animation-delay: -3s; }
+@keyframes blob {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(2.5rem, 2rem) scale(1.15); }
+}
+.splash-bowl { animation: bowl-pop 0.7s cubic-bezier(0.3, 1.4, 0.5, 1) both, bowl-bob 2.4s 0.8s ease-in-out infinite; }
+@keyframes bowl-pop { from { opacity: 0; transform: scale(0.4); } to { opacity: 1; transform: scale(1); } }
+@keyframes bowl-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+.splash-steam {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  animation: steam 1.8s ease-in-out infinite;
+}
+@keyframes steam {
+  0% { opacity: 0; transform: translateY(4px); }
+  40% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-4px); }
+}
+.splash-letter { display: inline-block; animation: letter-in 0.5s cubic-bezier(0.3, 1.4, 0.5, 1) both; }
+@keyframes letter-in {
+  from { opacity: 0; transform: translateY(14px) scale(0.8); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.splash-bar { width: 9rem; height: 4px; overflow: hidden; border-radius: 9999px; background: color-mix(in srgb, var(--color-brand) 15%, transparent); }
+.splash-bar span {
+  display: block;
+  width: 40%;
+  height: 100%;
+  border-radius: 9999px;
+  background: var(--color-brand);
+  animation: bar-slide 1.2s ease-in-out infinite;
+}
+@keyframes bar-slide {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(250%); }
 }
 
 /* Banner sambutan: "Selamat datang" jatuh dari atas, lalu nama warung muncul membal dengan kilau. */
@@ -44,7 +157,7 @@ body {
 }
 
 .welcome-pop {
-  background-image: linear-gradient(100deg, var(--color-brand) 35%, #fdba74 50%, var(--color-brand) 65%);
+  background-image: linear-gradient(100deg, var(--color-brand) 35%, color-mix(in srgb, var(--color-brand) 45%, white) 50%, var(--color-brand) 65%);
   background-size: 200% 100%;
   -webkit-background-clip: text;
   background-clip: text;
@@ -55,8 +168,14 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
   .welcome-drop,
   .welcome-pop {
     animation: none;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

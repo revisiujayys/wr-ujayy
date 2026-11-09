@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { normalizePhone } from '../../api/_lib/orderLogic';
 import { uploadImage } from '../lib/images';
 import { supabase } from '../lib/supabase';
+import { DAY_NAMES, sanitizeMap, setThemeMap, THEMES, type ThemeMap } from '../lib/theme';
 import { Btn, Card, ErrorNote, errorText, Field, Toggle } from './ui';
 
 type Settings = {
@@ -11,6 +12,7 @@ type Settings = {
   maps_url: string | null;
   open_time: string;
   close_time: string;
+  day_themes: unknown;
 };
 
 type Payment = {
@@ -27,6 +29,7 @@ export function ShopPage() {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [themes, setThemes] = useState<ThemeMap | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const load = useCallback(async () => {
@@ -37,6 +40,7 @@ export function ShopPage() {
     if (s.error || p.error) setError('Gagal memuat pengaturan');
     else {
       setSettings(s.data as Settings);
+      setThemes(sanitizeMap((s.data as Settings).day_themes));
       setPayment(p.data as Payment);
     }
   }, []);
@@ -88,6 +92,19 @@ export function ShopPage() {
       setError(null);
       setMessage('Pengaturan toko tersimpan');
       await load();
+    }
+  }
+
+  async function saveThemes() {
+    if (!themes) return;
+    setBusy(true);
+    const { error: e } = await supabase.from('store_settings').update({ day_themes: themes }).eq('id', 1);
+    setBusy(false);
+    if (e) setError(errorText(e));
+    else {
+      setError(null);
+      setThemeMap(themes);
+      setMessage('Tema harian tersimpan');
     }
   }
 
@@ -227,6 +244,42 @@ export function ShopPage() {
           Simpan data pembayaran
         </Btn>
       </Card>
+
+      {themes && (
+        <Card className="space-y-3 md:col-span-2">
+          <h2 className="text-base font-semibold">Tema harian</h2>
+          <p className="text-xs text-stone-500">
+            Warna situs berganti otomatis sesuai hari (WIB), untuk halaman pelanggan dan admin.
+          </p>
+          <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+            {[1, 2, 3, 4, 5, 6, 0].map((day) => {
+              const theme = THEMES.find((t) => t.id === themes[String(day)]);
+              return (
+                <li key={day} className="flex items-center gap-2 rounded-xl border border-stone-200 px-3 py-2">
+                  <span className="size-4 shrink-0 rounded-full" style={{ backgroundColor: theme?.brand }} aria-hidden="true" />
+                  <label className="min-w-0 flex-1 text-sm">
+                    <span className="block text-xs font-medium text-stone-500">{DAY_NAMES[day]}</span>
+                    <select
+                      value={themes[String(day)]}
+                      onChange={(e) => setThemes({ ...themes, [String(day)]: e.target.value })}
+                      className="w-full bg-transparent py-0.5 text-sm font-medium outline-none"
+                    >
+                      {THEMES.map((t) => (
+                        <option key={t.id} value={t.id}>
+                          {t.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                </li>
+              );
+            })}
+          </ul>
+          <Btn disabled={busy} onClick={() => void saveThemes()} className="w-full sm:w-auto">
+            Simpan tema harian
+          </Btn>
+        </Card>
+      )}
       </div>
     </div>
   );

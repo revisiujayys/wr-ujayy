@@ -228,7 +228,7 @@ export function Checkout({ catalog, items, subtotal, onBack, onSuccess }: Props)
                 </div>
               </>
             ) : (
-              <div className="rounded-xl bg-orange-50 p-3 text-sm text-stone-700">
+              <div className="rounded-xl bg-brand-soft p-3 text-sm text-stone-700">
                 <p className="font-medium">Ambil di warung, tanpa ongkir dan tanpa minimum belanja.</p>
                 <p className="mt-1">Pesanan baru dibuat saat Anda datang, tidak perlu pilih jam.</p>
                 {catalog.settings.address && <p className="mt-2">{catalog.settings.address}</p>}

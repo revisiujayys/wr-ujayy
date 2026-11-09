@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Sheet } from '../components/Sheet';
-import { ImageSearch } from './ImageSearch';
 import { rupiah } from '../lib/format';
 import { uploadImage } from '../lib/images';
 import { supabase } from '../lib/supabase';
@@ -48,7 +47,6 @@ function Editor({
   const [newVariant, setNewVariant] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [searching, setSearching] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   async function pickFile(file: File | undefined) {
@@ -201,9 +199,6 @@ function Editor({
               <Btn variant="ghost" disabled={busy} onClick={() => fileRef.current?.click()}>
                 Pilih dari galeri
               </Btn>
-              <Btn variant="ghost" disabled={busy} onClick={() => setSearching(true)}>
-                Cari foto
-              </Btn>
               {imageUrl && (
                 <Btn variant="ghost" disabled={busy} onClick={() => setImageUrl(null)}>
                   Hapus foto
@@ -282,9 +277,6 @@ function Editor({
           )}
         </div>
       </div>
-      {searching && (
-        <ImageSearch initialQuery={name} onPick={setImageUrl} onClose={() => setSearching(false)} />
-      )}
     </Sheet>
   );
 }
