@@ -16,16 +16,20 @@ export function ProductCard({
   onSetQty?: (qty: number) => void;
 }) {
   const soldOut = !product.available;
+  const variantCount = product.variants.length;
+  const stacked = variantCount > 1;
+  // Foto utama; jika kosong, pakai foto varian pertama yang ada.
+  const cover = product.imageUrl ?? product.variants.find((v) => v.imageUrl)?.imageUrl ?? null;
   const setQty = qty > 0 ? onSetQty : undefined;
   return (
     <article
-      className="reveal surface flex flex-col overflow-hidden p-2 transition-shadow duration-300 hover:shadow-lg"
+      className={`reveal surface flex flex-col p-2 ${stacked ? 'stack' : 'overflow-hidden'}`}
       style={{ animationDelay: `${Math.min(index, 12) * 45}ms` }}
     >
       <div className="relative aspect-square overflow-hidden rounded-[1.1rem] bg-stone-100">
-        {product.imageUrl ? (
+        {cover ? (
           <img
-            src={product.imageUrl}
+            src={cover}
             alt={product.name}
             loading="lazy"
             className={`size-full object-cover ${soldOut ? 'grayscale' : ''}`}
@@ -36,6 +40,11 @@ export function ProductCard({
               <path d="M4 16h24a12 12 0 0 1-24 0z" fill="currentColor" />
             </svg>
           </div>
+        )}
+        {stacked && !soldOut && (
+          <span className="absolute bottom-2 left-2 rounded-full bg-white/95 px-2.5 py-0.5 text-[11px] font-semibold text-stone-700 shadow-sm">
+            {variantCount} varian
+          </span>
         )}
         {soldOut && (
           <div className="absolute inset-0 grid place-items-center bg-white/60">

@@ -6,7 +6,7 @@ import { supabase } from '../lib/supabase';
 import { Btn, ErrorNote, errorText, Field, Toggle } from './ui';
 
 type Category = { id: string; name: string };
-type Variant = { id: string; name: string; is_available: boolean; sort_order: number };
+type Variant = { id: string; name: string; is_available: boolean; sort_order: number; image_url: string | null };
 type ProductRow = {
   id: string;
   category_id: string;
@@ -19,7 +19,7 @@ type ProductRow = {
   product_variants: Variant[];
 };
 
-type DraftVariant = { id?: string; name: string; is_available: boolean };
+type DraftVariant = { id?: string; name: string; is_available: boolean; image_url: string | null };
 
 function Editor({
   product,
@@ -42,7 +42,7 @@ function Editor({
   const [variants, setVariants] = useState<DraftVariant[]>(
     [...(product?.product_variants ?? [])]
       .sort((a, b) => a.sort_order - b.sort_order)
-      .map((v) => ({ id: v.id, name: v.name, is_available: v.is_available })),
+      .map((v) => ({ id: v.id, name: v.name, is_available: v.is_available, image_url: v.image_url })),
   );
   const [newVariant, setNewVariant] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -61,6 +61,19 @@ function Editor({
     setBusy(false);
   }
 
+  async function pickVariantFile(index: number, file: File | undefined) {
+    if (!file) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const url = await uploadImage(file, 'products', 'variant-');
+      setVariants((prev) => prev.map((x, j) => (j === index ? { ...x, image_url: url } : x)));
+    } catch (e) {
+      setError(errorText(e));
+    }
+    setBusy(false);
+  }
+
   function addVariant() {
     const n = newVariant.trim();
     if (!n) return;
@@ -69,7 +82,7 @@ function Editor({
       return;
     }
     setError(null);
-    setVariants([...variants, { name: n, is_available: true }]);
+    setVariants([...variants, { name: n, is_available: true, image_url: null }]);
     setNewVariant('');
   }
 
@@ -112,13 +125,13 @@ function Editor({
         if (v.id) {
           const { error: e } = await supabase
             .from('product_variants')
-            .update({ name: v.name, is_available: v.is_available, sort_order: index })
+            .update({ name: v.name, is_available: v.is_available, sort_order: index, image_url: v.image_url })
             .eq('id', v.id);
           if (e) throw e;
         } else {
           const { error: e } = await supabase
             .from('product_variants')
-            .insert({ product_id: id, name: v.name, is_available: v.is_available, sort_order: index });
+            .insert({ product_id: id, name: v.name, is_available: v.is_available, sort_order: index, image_url: v.image_url });
           if (e) throw e;
         }
       }
@@ -214,6 +227,21 @@ function Editor({
           <ul className="space-y-2">
             {variants.map((v, i) => (
               <li key={v.id ?? `new-${i}`} className="flex items-center gap-2">
+                <label
+                  className="relative grid size-11 shrink-0 cursor-pointer place-items-center overflow-hidden rounded-xl bg-stone-100 text-lg text-stone-400"
+                  aria-label={`Foto varian ${v.name}`}
+                >
+                  {v.image_url ? <img src={v.image_url} alt="" className="size-full object-cover" /> : '+'}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      void pickVariantFile(i, e.target.files?.[0]);
+                      e.target.value = '';
+                    }}
+                  />
+                </label>
                 <input
                   value={v.name}
                   onChange={(e) => setVariants(variants.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))}

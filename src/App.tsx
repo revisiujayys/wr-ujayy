@@ -71,7 +71,10 @@ export default function App() {
   useEffect(() => {
     if (state.status === 'loading') return;
     let alive = true;
-    const urls = state.status === 'ready' ? state.data.products.map((p) => p.imageUrl).filter((u): u is string => !!u) : [];
+    const urls =
+      state.status === 'ready'
+        ? [...new Set(state.data.products.flatMap((p) => [p.imageUrl, ...p.variants.map((v) => v.imageUrl)]).filter((u): u is string => !!u))]
+        : [];
     void Promise.all([preloadImages(urls), loadVisitors()]).then(() => {
       if (alive) setAssetsReady(true);
     });

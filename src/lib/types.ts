@@ -9,7 +9,7 @@ export type StoreSettings = {
 
 export type Category = { id: string; name: string };
 
-export type CatalogVariant = { id: string; name: string; available: boolean };
+export type CatalogVariant = { id: string; name: string; available: boolean; imageUrl: string | null };
 
 export type CatalogProduct = {
   id: string;

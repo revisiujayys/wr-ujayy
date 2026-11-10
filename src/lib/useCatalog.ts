@@ -22,7 +22,7 @@ type ProductRow = {
   image_url: string | null;
   product_type: 'regular' | 'noodle';
   is_available: boolean;
-  product_variants: { id: string; name: string; is_available: boolean; sort_order: number }[] | null;
+  product_variants: { id: string; name: string; is_available: boolean; sort_order: number; image_url: string | null }[] | null;
 };
 
 type ToppingRow = { id: string; name: string; price: number; is_available: boolean };
@@ -36,7 +36,7 @@ async function load(fresh: boolean): Promise<Catalog> {
     supabase
       .from('products')
       .select(
-        'id, category_id, name, description, base_price, image_url, product_type, is_available, product_variants(id, name, is_available, sort_order)',
+        'id, category_id, name, description, base_price, image_url, product_type, is_available, product_variants(id, name, is_available, sort_order, image_url)',
       )
       .eq('is_active', true)
       .order('sort_order')
@@ -58,7 +58,7 @@ async function load(fresh: boolean): Promise<Catalog> {
   const products: CatalogProduct[] = (prods.data as ProductRow[]).map((p) => {
     const variants = [...(p.product_variants ?? [])]
       .sort((a, b) => a.sort_order - b.sort_order)
-      .map((v) => ({ id: v.id, name: v.name, available: v.is_available }));
+      .map((v) => ({ id: v.id, name: v.name, available: v.is_available, imageUrl: v.image_url }));
     return {
       id: p.id,
       categoryId: p.category_id,

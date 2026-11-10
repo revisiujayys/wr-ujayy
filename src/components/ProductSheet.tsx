@@ -22,6 +22,8 @@ export function ProductSheet({ product, toppings, onClose, onAdd }: Props) {
   const toppingsTotal = toppings.filter((t) => picked.includes(t.id)).reduce((sum, t) => sum + t.price, 0);
   const total = (product.price + toppingsTotal) * qty;
   const canAdd = !hasVariants || variantId !== '';
+  const selectedVariant = product.variants.find((v) => v.id === variantId);
+  const shownImage = selectedVariant?.imageUrl ?? product.imageUrl ?? product.variants.find((v) => v.imageUrl)?.imageUrl ?? null;
 
   const toggleTopping = (id: string) =>
     setPicked((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
@@ -33,6 +35,11 @@ export function ProductSheet({ product, toppings, onClose, onAdd }: Props) {
 
   return (
     <Sheet title={product.name} onClose={onClose}>
+      {shownImage && (
+        <div className="mb-3 overflow-hidden rounded-3xl bg-stone-100">
+          <img key={shownImage} src={shownImage} alt={product.name} className="reveal-fade aspect-[4/3] w-full object-contain" />
+        </div>
+      )}
       <p className="text-sm font-semibold text-brand">{rupiah(product.price)}</p>
 
       {hasVariants && (
@@ -47,7 +54,10 @@ export function ProductSheet({ product, toppings, onClose, onAdd }: Props) {
                 onClick={() => setVariantId(v.id)}
                 className={choice(variantId === v.id, !v.available)}
               >
-                <span>{v.name}</span>
+                <span className="flex items-center gap-2.5">
+                  {v.imageUrl && <img src={v.imageUrl} alt="" className="size-9 rounded-lg bg-white object-cover" />}
+                  {v.name}
+                </span>
                 {!v.available && <span className="text-xs">Habis</span>}
               </button>
             ))}
