@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { getStoreSettings } from './storeSettings';
 import { supabase } from './supabase';
 import type { CatalogProduct, Category, DeliveryArea, StoreSettings, Topping } from './types';
 
@@ -27,7 +28,7 @@ type ProductRow = {
 type ToppingRow = { id: string; name: string; price: number; is_available: boolean };
 type AreaRow = { id: string; name: string; min_order: number; delivery_fee: number };
 
-async function load(): Promise<Catalog> {
+async function load(fresh: boolean): Promise<Catalog> {
   // Filter is_active eksplisit: admin yang sedang login juga bisa membaca baris nonaktif,
   // tetapi pelanggan tidak boleh melihatnya.
   const [cats, prods, tops, areas, settings] = await Promise.all([
@@ -46,14 +47,11 @@ async function load(): Promise<Catalog> {
       .select('id, name, min_order, delivery_fee')
       .eq('is_active', true)
       .order('sort_order'),
-    supabase
-      .from('store_settings')
-      .select('is_open, whatsapp_number, address, maps_url, open_time, close_time')
-      .eq('id', 1)
-      .single(),
+    // Pengaturan toko dibagi dengan tema harian: satu permintaan saja.
+    getStoreSettings(fresh),
   ]);
 
-  if (cats.error || prods.error || tops.error || areas.error || settings.error) {
+  if (cats.error || prods.error || tops.error || areas.error) {
     throw new Error('Gagal memuat katalog');
   }
 
@@ -90,7 +88,14 @@ async function load(): Promise<Catalog> {
       minOrder: a.min_order,
       fee: a.delivery_fee,
     })),
-    settings: settings.data as StoreSettings,
+    settings: {
+      is_open: settings.is_open,
+      whatsapp_number: settings.whatsapp_number,
+      address: settings.address,
+      maps_url: settings.maps_url,
+      open_time: settings.open_time,
+      close_time: settings.close_time,
+    },
   };
 }
 
@@ -101,7 +106,7 @@ export function useCatalog() {
   useEffect(() => {
     let cancelled = false;
     setState({ status: 'loading' });
-    load()
+    load(attempt > 0)
       .then((data) => {
         if (!cancelled) setState({ status: 'ready', data });
       })

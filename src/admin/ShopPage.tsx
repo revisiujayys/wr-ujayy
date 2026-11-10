@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { normalizePhone } from '../../api/_lib/orderLogic';
 import { uploadImage } from '../lib/images';
+import { getStoreSettings, patchStoreSettings } from '../lib/storeSettings';
 import { supabase } from '../lib/supabase';
 import { DAY_NAMES, sanitizeMap, setThemeMap, THEMES, type ThemeMap } from '../lib/theme';
 import { Btn, Card, ErrorNote, errorText, Field, Toggle } from './ui';
@@ -33,14 +34,18 @@ export function ShopPage() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const load = useCallback(async () => {
+    // Pengaturan toko memakai cache bersama (sudah dimuat saat admin dibuka); hanya data pembayaran yang baru diminta.
     const [s, p] = await Promise.all([
-      supabase.from('store_settings').select('*').eq('id', 1).single(),
+      getStoreSettings().then(
+        (row) => row as unknown as Settings,
+        () => null,
+      ),
       supabase.from('payment_settings').select('*').eq('id', 1).single(),
     ]);
-    if (s.error || p.error) setError('Gagal memuat pengaturan');
+    if (!s || p.error) setError('Gagal memuat pengaturan');
     else {
-      setSettings(s.data as Settings);
-      setThemes(sanitizeMap((s.data as Settings).day_themes));
+      setSettings(s);
+      setThemes(sanitizeMap(s.day_themes));
       setPayment(p.data as Payment);
     }
   }, []);
@@ -63,8 +68,11 @@ export function ShopPage() {
     const { error: e } = await supabase.from('store_settings').update({ is_open: open }).eq('id', 1);
     if (e) {
       setError(errorText(e));
-      await load();
-    } else setError(null);
+      setSettings((prev) => (prev ? { ...prev, is_open: !open } : prev));
+    } else {
+      patchStoreSettings({ is_open: open });
+      setError(null);
+    }
   }
 
   async function saveStore() {
@@ -76,22 +84,22 @@ export function ShopPage() {
       return;
     }
     setBusy(true);
-    const { error: e } = await supabase
-      .from('store_settings')
-      .update({
-        whatsapp_number: normalized,
-        address: settings.address?.trim() || null,
-        maps_url: settings.maps_url?.trim() || null,
-        open_time: settings.open_time.slice(0, 5),
-        close_time: settings.close_time.slice(0, 5),
-      })
-      .eq('id', 1);
+    const patch = {
+      whatsapp_number: normalized,
+      address: settings.address?.trim() || null,
+      maps_url: settings.maps_url?.trim() || null,
+      open_time: settings.open_time.slice(0, 5),
+      close_time: settings.close_time.slice(0, 5),
+    };
+    const { error: e } = await supabase.from('store_settings').update(patch).eq('id', 1);
     setBusy(false);
     if (e) setError(errorText(e));
     else {
+      // Cukup perbarui cache & tampilan; tidak perlu meminta ulang ke server.
+      patchStoreSettings(patch);
+      setSettings((prev) => (prev ? { ...prev, ...patch } : prev));
       setError(null);
       setMessage('Pengaturan toko tersimpan');
-      await load();
     }
   }
 
@@ -103,6 +111,7 @@ export function ShopPage() {
     if (e) setError(errorText(e));
     else {
       setError(null);
+      patchStoreSettings({ day_themes: themes });
       setThemeMap(themes);
       setMessage('Tema harian tersimpan');
     }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { supabase } from './supabase';
+import { getStoreSettings } from './storeSettings';
 
 export type Theme = { id: string; name: string; brand: string };
 
@@ -109,13 +109,11 @@ function applyTheme(id: string): void {
 
 let themePromise: Promise<void> | null = null;
 
-// Ambil pemetaan tema dari server sekali saja.
+// Pemetaan tema ikut dibaca dari pengaturan toko yang sama dengan katalog (satu permintaan bersama).
 export function loadThemeMap(): Promise<void> {
   if (!themePromise) {
-    themePromise = Promise.resolve(supabase.from('store_settings').select('day_themes').eq('id', 1).single()).then(
-      ({ data, error }) => {
-        if (!error && data) setThemeMap(sanitizeMap((data as { day_themes: unknown }).day_themes));
-      },
+    themePromise = getStoreSettings().then(
+      (row) => setThemeMap(sanitizeMap(row.day_themes)),
       () => undefined,
     );
   }

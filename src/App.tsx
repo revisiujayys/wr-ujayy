@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { CartSheet } from './components/CartSheet';
 import { CategoryTabs } from './components/CategoryTabs';
 import { Checkout, type OrderResult } from './components/Checkout';
+import { CartButton } from './components/CartButton';
 import { InfoStrip } from './components/InfoStrip';
 import { Logo } from './components/Logo';
 import { OrderSuccess } from './components/OrderSuccess';
@@ -125,24 +126,25 @@ export default function App() {
 
   const app = (
     <div className="min-h-dvh pb-8">
-      <header className="glass-bar sticky top-0 z-10 rounded-b-[1.75rem]">
+      <header className="glass-bar sticky top-0 z-10">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
           <Logo />
           {data && (
-            <span
-              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
-                data.settings.is_open ? 'bg-emerald-50 text-emerald-700' : 'bg-stone-100 text-stone-600'
-              }`}
-            >
-              <span className={`size-1.5 rounded-full ${data.settings.is_open ? 'bg-emerald-500' : 'bg-stone-400'}`} />
-              {data.settings.is_open ? 'Buka' : 'Tutup'}
-            </span>
+            <div className="flex items-center gap-2">
+              <span
+                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
+                  data.settings.is_open ? 'bg-emerald-50 text-emerald-700' : 'bg-stone-100 text-stone-600'
+                }`}
+              >
+                <span className={`size-1.5 rounded-full ${data.settings.is_open ? 'bg-emerald-500' : 'bg-stone-400'}`} />
+                {data.settings.is_open ? 'Buka' : 'Tutup'}
+              </span>
+              <CartButton count={cart.count} disabled={view !== 'catalog'} onOpen={() => setCartOpen(true)} />
+            </div>
           )}
         </div>
-        <InfoStrip
-          cart={data ? { count: cart.count, disabled: view !== 'catalog', onOpen: () => setCartOpen(true) } : undefined}
-        />
       </header>
+      <InfoStrip />
 
       <main key={view} className="reveal-fade mx-auto max-w-5xl space-y-4 px-4 py-4">
         {view === 'success' && lastOrder && <OrderSuccess result={lastOrder} onDone={leaveSuccess} />}

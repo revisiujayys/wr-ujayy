@@ -59,8 +59,18 @@ export function OrdersPage() {
 
   useEffect(() => {
     void load();
-    const timer = window.setInterval(() => void load(), 30000);
-    return () => window.clearInterval(timer);
+    // Perbarui tiap 30 detik hanya saat tab terlihat; saat kembali ke tab, muat sekali.
+    const timer = window.setInterval(() => {
+      if (!document.hidden) void load();
+    }, 30000);
+    const onVisible = () => {
+      if (!document.hidden) void load();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
   }, [load]);
 
   async function setPaid(order: OrderRow, paid: boolean) {

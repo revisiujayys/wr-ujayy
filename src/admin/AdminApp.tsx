@@ -130,15 +130,15 @@ export default function AdminApp() {
 
   return (
     <div className="min-h-dvh pb-24">
-      <header className="glass-bar sticky top-0 z-10 rounded-b-[1.75rem]">
+      <header className="glass-bar sticky top-0 z-10">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
           <Logo />
           <Btn variant="ghost" onClick={() => void logout()} className="px-3 py-1.5">
             Keluar
           </Btn>
         </div>
-        <InfoStrip />
       </header>
+      <InfoStrip />
 
       <main key={tab} className="reveal-fade mx-auto max-w-5xl space-y-4 px-4 py-4">
         {tab === 'orders' && <OrdersPage />}
