@@ -12,6 +12,8 @@ type ListProps = {
   cols: Col[];
   flagKey: string;
   flagLabel: string;
+  // true = tampilkan satu item saja, dipilih lewat dropdown (untuk daftar panjang seperti desa)
+  single?: boolean;
 };
 
 function RowEditor({
@@ -72,8 +74,9 @@ function RowEditor({
   );
 }
 
-function MasterList({ title, hint, table, cols, flagKey, flagLabel }: ListProps) {
+function MasterList({ title, hint, table, cols, flagKey, flagLabel, single = false }: ListProps) {
   const [rows, setRows] = useState<Row[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [draft, setDraft] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
 
@@ -112,7 +115,17 @@ function MasterList({ title, hint, table, cols, flagKey, flagLabel }: ListProps)
   async function add() {
     const payload = toPayload(draft);
     if (typeof payload === 'string') return setError(payload);
-    await run(supabase.from(table).insert({ ...payload, [flagKey]: true, sort_order: rows.length + 1 }));
+    const res = await supabase
+      .from(table)
+      .insert({ ...payload, [flagKey]: true, sort_order: rows.length + 1 })
+      .select('id')
+      .single();
+    if (res.error) setError(errorText(res.error));
+    else {
+      setError(null);
+      setSelectedId((res.data as { id: string }).id); // langsung tampilkan item yang baru ditambah
+    }
+    await load();
     setDraft({});
   }
 
@@ -121,8 +134,23 @@ function MasterList({ title, hint, table, cols, flagKey, flagLabel }: ListProps)
       <h2 className="text-base font-semibold">{title}</h2>
       <p className="mb-3 text-xs text-stone-500">{hint}</p>
       <ErrorNote message={error} />
+      {single && rows.length > 0 && (
+        <select
+          aria-label={`Pilih ${title}`}
+          value={(rows.find((r) => r.id === selectedId) ?? rows[0]).id}
+          onChange={(e) => setSelectedId(e.target.value)}
+          className="input mb-2 font-medium"
+        >
+          {rows.map((r) => (
+            <option key={r.id} value={r.id}>
+              {String(r.name)}
+              {r[flagKey] === true ? '' : ' (nonaktif)'}
+            </option>
+          ))}
+        </select>
+      )}
       <ul className="mt-2 space-y-2">
-        {rows.map((r) => (
+        {(single ? rows.filter((r) => r.id === (rows.find((x) => x.id === selectedId) ?? rows[0]).id) : rows).map((r) => (
           <RowEditor
             key={r.id}
             row={r}
@@ -143,9 +171,11 @@ function MasterList({ title, hint, table, cols, flagKey, flagLabel }: ListProps)
         ))}
       </ul>
 
-      <div className="mt-4 rounded-2xl bg-stone-50 p-3">
-        <p className="mb-2 text-xs font-medium text-stone-600">Tambah baru</p>
-        <div className="grid grid-cols-2 gap-2">
+      <details className="group mt-3 rounded-2xl bg-stone-50 p-3">
+        <summary className="cursor-pointer list-none text-sm font-medium text-stone-700">
+          + Tambah baru
+        </summary>
+        <div className="mt-2 grid grid-cols-2 gap-2">
           {cols.map((c) => (
             <label key={c.key} className={`block text-xs ${c.kind === 'text' ? 'col-span-2' : ''}`}>
               <span className="mb-0.5 block text-stone-500">{c.label}</span>
@@ -163,7 +193,7 @@ function MasterList({ title, hint, table, cols, flagKey, flagLabel }: ListProps)
         <Btn onClick={() => void add()} className="mt-2 w-full">
           Tambah
         </Btn>
-      </div>
+      </details>
     </Card>
   );
 }
@@ -201,6 +231,7 @@ export function DataPage() {
         ]}
         flagKey="is_active"
         flagLabel="Dilayani"
+        single
       />
     </div>
   );
