@@ -125,7 +125,7 @@ export default function App() {
 
   const app = (
     <div className="min-h-dvh pb-8">
-      <header className="sticky top-0 z-10 border-b border-stone-200 bg-white/90 backdrop-blur">
+      <header className="glass-bar sticky top-0 z-10 rounded-b-[1.75rem]">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
           <Logo />
           {data && (
@@ -168,7 +168,7 @@ export default function App() {
             )}
 
             {state.status === 'error' && (
-              <div className="rounded-2xl border border-stone-200 bg-white p-6 text-center">
+              <div className="surface p-6 text-center">
                 <p className="text-sm text-stone-600">Katalog belum bisa dimuat. Periksa koneksi Anda.</p>
                 <button
                   type="button"
@@ -182,14 +182,20 @@ export default function App() {
 
             {state.status !== 'error' && (
               <>
-                <input
-                  type="search"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Cari produk…"
-                  aria-label="Cari produk"
-                  className="w-full rounded-full border border-stone-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-stone-400"
-                />
+                <label className="surface relative block !rounded-full">
+                  <svg viewBox="0 0 24 24" className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-stone-400" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
+                    <circle cx="11" cy="11" r="7" />
+                    <path d="m20 20-3.5-3.5" />
+                  </svg>
+                  <input
+                    type="search"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Cari produk…"
+                    aria-label="Cari produk"
+                    className="w-full rounded-full bg-transparent py-3 pl-11 pr-4 text-sm outline-none"
+                  />
+                </label>
 
                 {data && data.categories.length > 0 && (
                   <CategoryTabs categories={data.categories} value={categoryId} onChange={setCategoryId} />
@@ -205,9 +211,21 @@ export default function App() {
 
                 {data && visible.length > 0 && (
                   <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
-                    {visible.map((p, i) => (
-                      <ProductCard key={p.id} product={p} index={i} onAdd={handleAdd} />
-                    ))}
+                    {visible.map((p, i) => {
+                      const line = cart.lines.find(
+                        (l) => l.productId === p.id && !l.variantId && !l.noodleStyle && l.toppingIds.length === 0,
+                      );
+                      return (
+                      <ProductCard
+                        key={p.id}
+                        product={p}
+                        index={i}
+                        qty={line?.quantity ?? 0}
+                        onAdd={handleAdd}
+                        onSetQty={(q) => line && cart.setQty(line.key, q)}
+                      />
+                    );
+                    })}
                   </div>
                 )}
 
@@ -224,7 +242,7 @@ export default function App() {
 
       {data && view !== 'success' && (
         <footer className="mx-auto max-w-5xl px-4 pb-6 pt-4 text-sm text-stone-500">
-          <div className="border-t border-stone-200 pt-4">
+          <div className="surface p-5">
             <p className="font-medium text-stone-700">Lokasi warung</p>
             {data.settings.address && <p className="mt-1">{data.settings.address}</p>}
             <p className="mt-1">

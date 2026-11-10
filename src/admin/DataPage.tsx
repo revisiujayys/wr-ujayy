@@ -36,7 +36,7 @@ function RowEditor({
   const dirty = cols.some((c) => values[c.key] !== initial[c.key]);
 
   return (
-    <li className="rounded-xl border border-stone-200 p-3">
+    <li className="rounded-2xl bg-stone-50 p-3">
       <div className="grid grid-cols-2 gap-2">
         {cols.map((c) => (
           <label key={c.key} className={`block text-xs ${c.kind === 'text' ? 'col-span-2' : ''}`}>
@@ -47,7 +47,7 @@ function RowEditor({
               onChange={(e) =>
                 setValues({ ...values, [c.key]: c.kind === 'number' ? e.target.value.replace(/\D/g, '') : e.target.value })
               }
-              className="w-full rounded-lg border border-stone-300 px-2.5 py-1.5 text-sm"
+              className="input !rounded-xl !bg-white !py-1.5"
             />
           </label>
         ))}
@@ -143,7 +143,7 @@ function MasterList({ title, hint, table, cols, flagKey, flagLabel }: ListProps)
         ))}
       </ul>
 
-      <div className="mt-4 rounded-xl bg-stone-50 p-3">
+      <div className="mt-4 rounded-2xl bg-stone-50 p-3">
         <p className="mb-2 text-xs font-medium text-stone-600">Tambah baru</p>
         <div className="grid grid-cols-2 gap-2">
           {cols.map((c) => (
@@ -155,7 +155,7 @@ function MasterList({ title, hint, table, cols, flagKey, flagLabel }: ListProps)
                 onChange={(e) =>
                   setDraft({ ...draft, [c.key]: c.kind === 'number' ? e.target.value.replace(/\D/g, '') : e.target.value })
                 }
-                className="w-full rounded-lg border border-stone-300 bg-white px-2.5 py-1.5 text-sm"
+                className="input !rounded-xl !py-1.5"
               />
             </label>
           ))}

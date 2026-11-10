@@ -37,7 +37,7 @@ export function CartSheet({ items, subtotal, hasProblem, isOpen, onClose, onChec
                       type="button"
                       aria-label="Kurangi"
                       onClick={() => cart.setQty(item.line.key, item.line.quantity - 1)}
-                      className="grid size-8 place-items-center rounded-full border border-stone-300"
+                      className="grid size-8 place-items-center rounded-full bg-stone-100 text-base font-semibold"
                     >
                       −
                     </button>
@@ -46,7 +46,7 @@ export function CartSheet({ items, subtotal, hasProblem, isOpen, onClose, onChec
                       type="button"
                       aria-label="Tambah"
                       onClick={() => cart.setQty(item.line.key, item.line.quantity + 1)}
-                      className="grid size-8 place-items-center rounded-full border border-stone-300"
+                      className="grid size-8 place-items-center rounded-full bg-brand text-base font-semibold text-white"
                     >
                       +
                     </button>
@@ -59,7 +59,7 @@ export function CartSheet({ items, subtotal, hasProblem, isOpen, onClose, onChec
             ))}
           </ul>
 
-          <div className="mt-3 flex items-center justify-between border-t border-stone-200 pt-3">
+          <div className="mt-3 flex items-center justify-between rounded-2xl bg-stone-50 px-4 py-3">
             <span className="text-sm text-stone-600">Subtotal</span>
             <span className="text-base font-semibold">{rupiah(subtotal)}</span>
           </div>

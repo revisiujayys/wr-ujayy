@@ -56,6 +56,43 @@ button, a, input, select, textarea {
 button:not(:disabled):not([data-nopress]):active { transform: scale(0.97); }
 input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-brand) 18%, transparent); }
 
+/* Permukaan lembut: tanpa garis kotak, sudut membulat, bayangan tipis. */
+.surface {
+  background: #fff;
+  border-radius: 1.5rem;
+  box-shadow: 0 0 0 1px rgb(28 25 23 / 0.04), 0 1px 2px rgb(28 25 23 / 0.04), 0 10px 24px -14px rgb(28 25 23 / 0.18);
+}
+.tile {
+  background: rgb(255 255 255 / 0.85);
+  border-radius: 1rem;
+  box-shadow: 0 0 0 1px rgb(28 25 23 / 0.04), 0 1px 2px rgb(28 25 23 / 0.04);
+}
+.input {
+  width: 100%;
+  border-radius: 1rem;
+  border: 1px solid transparent;
+  background: var(--color-stone-100);
+  padding: 0.625rem 0.9rem;
+  font-size: 0.875rem;
+  outline: none;
+}
+.input:focus {
+  background: #fff;
+  border-color: color-mix(in srgb, var(--color-brand) 50%, transparent);
+}
+.hero-bg {
+  background:
+    radial-gradient(120% 120% at 100% 0%, color-mix(in srgb, var(--color-brand) 14%, transparent), transparent 60%),
+    linear-gradient(135deg, var(--color-brand-soft), #fff 70%);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-brand) 10%, transparent), 0 12px 30px -18px color-mix(in srgb, var(--color-brand) 45%, transparent);
+}
+.glass-bar {
+  background: rgb(255 255 255 / 0.82);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  backdrop-filter: blur(14px) saturate(1.4);
+  box-shadow: 0 1px 0 rgb(28 25 23 / 0.04), 0 12px 28px -18px rgb(28 25 23 / 0.35);
+}
+
 @keyframes reveal-up {
   from { opacity: 0; transform: translateY(14px); }
   to { opacity: 1; transform: translateY(0); }

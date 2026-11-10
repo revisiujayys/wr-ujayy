@@ -27,12 +27,8 @@ export function ProductSheet({ product, toppings, onClose, onAdd }: Props) {
     setPicked((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
 
   const choice = (active: boolean, disabled = false) =>
-    `flex w-full items-center justify-between rounded-xl border px-3 py-2.5 text-left text-sm ${
-      disabled
-        ? 'border-stone-200 bg-stone-50 text-stone-400'
-        : active
-          ? 'border-stone-900 bg-stone-900 text-white'
-          : 'border-stone-200 bg-white text-stone-800'
+    `flex w-full items-center justify-between rounded-2xl px-3.5 py-3 text-left text-sm transition-colors ${
+      disabled ? 'bg-stone-50 text-stone-400' : active ? 'bg-brand text-white shadow-sm' : 'bg-stone-100 text-stone-800'
     }`;
 
   return (
@@ -102,7 +98,7 @@ export function ProductSheet({ product, toppings, onClose, onAdd }: Props) {
             type="button"
             aria-label="Kurangi"
             onClick={() => setQty((q) => Math.max(1, q - 1))}
-            className="grid size-9 place-items-center rounded-full border border-stone-300 text-lg"
+            className="grid size-9 place-items-center rounded-full bg-stone-100 text-lg font-semibold"
           >
             −
           </button>
@@ -111,7 +107,7 @@ export function ProductSheet({ product, toppings, onClose, onAdd }: Props) {
             type="button"
             aria-label="Tambah"
             onClick={() => setQty((q) => Math.min(99, q + 1))}
-            className="grid size-9 place-items-center rounded-full border border-stone-300 text-lg"
+            className="grid size-9 place-items-center rounded-full bg-stone-100 text-lg font-semibold"
           >
             +
           </button>

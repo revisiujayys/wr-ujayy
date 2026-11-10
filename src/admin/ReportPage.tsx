@@ -32,7 +32,7 @@ function todayJakarta(): string {
 
 function Stat({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div className="rounded-xl bg-stone-50 p-3">
+    <div className="rounded-2xl bg-stone-50 p-3">
       <p className="text-xs text-stone-500">{label}</p>
       <p className="text-lg font-bold">{value}</p>
       {sub && <p className="text-xs text-stone-500">{sub}</p>}

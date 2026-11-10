@@ -5,7 +5,7 @@ type BtnProps = ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' 
 export function Btn({ variant = 'primary', className = '', ...rest }: BtnProps) {
   const styles = {
     primary: 'bg-stone-900 text-white',
-    ghost: 'border border-stone-300 bg-white text-stone-800',
+    ghost: 'bg-white text-stone-800 shadow-sm ring-1 ring-stone-900/10',
     danger: 'bg-red-600 text-white',
   }[variant];
   return (
@@ -23,7 +23,7 @@ export function Field({ label, ...rest }: InputHTMLAttributes<HTMLInputElement> 
       <span className="mb-1 block font-medium text-stone-700">{label}</span>
       <input
         {...rest}
-        className="w-full rounded-xl border border-stone-300 bg-white px-3 py-2 outline-none focus:border-stone-500"
+        className="input"
       />
     </label>
   );
@@ -47,13 +47,13 @@ export function Toggle({ checked, onChange, label }: { checked: boolean; onChang
 }
 
 export function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
-  return <section className={`rounded-2xl border border-stone-200 bg-white p-4 ${className}`}>{children}</section>;
+  return <section className={`surface p-4 ${className}`}>{children}</section>;
 }
 
 export function ErrorNote({ message }: { message: string | null }) {
   if (!message) return null;
   return (
-    <p role="alert" className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">
+    <p role="alert" className="rounded-2xl bg-red-50 px-3 py-2 text-sm text-red-700">
       {message}
     </p>
   );

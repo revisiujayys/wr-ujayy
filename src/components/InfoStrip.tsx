@@ -28,27 +28,26 @@ export function InfoStrip({ cart }: { cart?: StripCart }) {
   const hasItems = !!cart && cart.count > 0;
 
   return (
-    <div className="border-t border-stone-200/70 bg-brand-soft/60 transition-colors duration-500">
-      <dl
-        className={`mx-auto grid max-w-5xl items-center divide-x divide-stone-200/80 px-1 py-1.5 ${
-          cart ? 'grid-cols-[1.35fr_1fr_0.85fr_auto]' : 'grid-cols-[1.4fr_1fr_0.8fr]'
-        }`}
-      >
-        {cells.map((c) => (
-          <div key={c.label} className="min-w-0 px-2 text-center">
-            <dt className="text-[10px] font-medium uppercase tracking-wider text-stone-500">{c.label}</dt>
-            <dd className={`truncate text-[11px] font-semibold text-stone-800 sm:text-xs ${c.extra}`}>{c.value}</dd>
-          </div>
-        ))}
+    <div
+      className={`mx-auto grid max-w-5xl items-stretch gap-2 px-4 pb-3 pt-1 ${
+        cart ? 'grid-cols-[1.35fr_1fr_0.85fr_auto]' : 'grid-cols-[1.4fr_1fr_0.8fr]'
+      }`}
+    >
+      {cells.map((c) => (
+        <div key={c.label} className="tile min-w-0 px-2.5 py-1.5 text-center">
+          <p className="text-[10px] font-medium uppercase tracking-wider text-stone-400">{c.label}</p>
+          <p className={`truncate text-[11px] font-semibold text-stone-800 sm:text-xs ${c.extra}`}>{c.value}</p>
+        </div>
+      ))}
         {cart && (
-          <div className="flex justify-center px-2">
+          <div className="flex items-center justify-center">
             <button
               type="button"
               onClick={cart.onOpen}
               disabled={cart.disabled || !hasItems}
               aria-label={hasItems ? `Buka keranjang, ${cart.count} item` : 'Keranjang kosong'}
-              className={`relative grid size-10 place-items-center rounded-full transition-colors ${
-                hasItems ? 'bg-brand text-white shadow-sm' : 'bg-white/80 text-stone-400'
+              className={`relative grid size-11 place-items-center rounded-full transition-colors ${
+                hasItems ? 'bg-brand text-white shadow-sm' : 'tile !rounded-full text-stone-400'
               } disabled:cursor-default`}
             >
               <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -67,7 +66,6 @@ export function InfoStrip({ cart }: { cart?: StripCart }) {
             </button>
           </div>
         )}
-      </dl>
     </div>
   );
 }

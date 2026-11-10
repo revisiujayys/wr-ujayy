@@ -23,7 +23,7 @@ type Props = {
 };
 
 const inputCls =
-  'w-full rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-stone-500';
+  'input';
 
 function Label({ text, children }: { text: string; children: ReactNode }) {
   return (
@@ -39,8 +39,8 @@ function Choice({ active, onClick, children }: { active: boolean; onClick: () =>
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-xl border px-3 py-2.5 text-sm font-medium ${
-        active ? 'border-stone-900 bg-stone-900 text-white' : 'border-stone-200 bg-white text-stone-800'
+      className={`rounded-2xl px-3 py-2.5 text-sm font-medium transition-colors ${
+        active ? 'bg-brand text-white shadow-sm' : 'bg-stone-100 text-stone-800'
       }`}
     >
       {children}
@@ -120,7 +120,7 @@ export function Checkout({ catalog, items, subtotal, onBack, onSuccess }: Props)
   }
 
   const summary = (
-    <section className="rounded-2xl border border-stone-200 bg-white p-4">
+    <section className="surface p-4">
       <h2 className="mb-2 text-sm font-semibold">Pesanan Anda</h2>
       <ul className="space-y-2">
         {items.map((i) => (
@@ -168,7 +168,7 @@ export function Checkout({ catalog, items, subtotal, onBack, onSuccess }: Props)
       {step === 'form' && (
         <div className="grid items-start gap-4 md:grid-cols-[minmax(0,1fr)_20rem]">
           <div className="space-y-4">
-          <section className="space-y-3 rounded-2xl border border-stone-200 bg-white p-4">
+          <section className="space-y-3 surface p-4">
             <Label text="Nama penerima">
               <input className={inputCls} value={name} onChange={(e) => setName(e.target.value)} maxLength={80} autoComplete="name" />
             </Label>
@@ -185,7 +185,7 @@ export function Checkout({ catalog, items, subtotal, onBack, onSuccess }: Props)
             </Label>
           </section>
 
-          <section className="space-y-3 rounded-2xl border border-stone-200 bg-white p-4">
+          <section className="space-y-3 surface p-4">
             <h2 className="text-sm font-semibold">Pengambilan</h2>
             <div className="grid grid-cols-2 gap-2">
               <Choice active={isDelivery} onClick={() => setFulfillment('delivery')}>
@@ -246,7 +246,7 @@ export function Checkout({ catalog, items, subtotal, onBack, onSuccess }: Props)
             )}
           </section>
 
-          <section className="space-y-3 rounded-2xl border border-stone-200 bg-white p-4">
+          <section className="space-y-3 surface p-4">
             <h2 className="text-sm font-semibold">Pembayaran</h2>
             <div className="grid grid-cols-2 gap-2">
               <Choice active={payment === 'cod'} onClick={() => setPayment('cod')}>
@@ -293,7 +293,7 @@ export function Checkout({ catalog, items, subtotal, onBack, onSuccess }: Props)
           <div className="grid items-start gap-4 md:grid-cols-2">
           {summary}
 
-          <section className="space-y-1 rounded-2xl border border-stone-200 bg-white p-4 text-sm">
+          <section className="space-y-1 surface p-4 text-sm">
             <p>
               <span className="text-stone-500">Nama: </span>
               {name.trim()}

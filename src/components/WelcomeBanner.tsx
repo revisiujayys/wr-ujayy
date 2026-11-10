@@ -3,7 +3,7 @@ import type { StoreSettings } from '../lib/types';
 
 export function WelcomeBanner({ settings }: { settings: StoreSettings | null }) {
   return (
-    <section className="select-none overflow-hidden rounded-3xl bg-brand-soft px-6 py-8 text-center">
+    <section className="select-none overflow-hidden rounded-[2rem] hero-bg px-6 py-9 text-center">
       <p className="welcome-drop text-base font-medium text-stone-600">Selamat datang</p>
       <h1 className="welcome-pop mt-1 text-4xl font-extrabold tracking-tight">di Wr. Ujayy</h1>
       {settings && (

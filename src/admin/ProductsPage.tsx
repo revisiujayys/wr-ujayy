@@ -150,7 +150,7 @@ function Editor({
           <select
             value={categoryId}
             onChange={(e) => setCategoryId(e.target.value)}
-            className="w-full rounded-xl border border-stone-300 bg-white px-3 py-2"
+            className="input"
           >
             {categories.map((c) => (
               <option key={c.id} value={c.id}>
@@ -165,7 +165,7 @@ function Editor({
           <select
             value={type}
             onChange={(e) => setType(e.target.value as 'regular' | 'noodle')}
-            className="w-full rounded-xl border border-stone-300 bg-white px-3 py-2"
+            className="input"
           >
             <option value="regular">Biasa</option>
             <option value="noodle">Mie rebus/goreng (pilih kuah/goreng + topping)</option>
@@ -217,7 +217,7 @@ function Editor({
                 <input
                   value={v.name}
                   onChange={(e) => setVariants(variants.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))}
-                  className="min-w-0 flex-1 rounded-xl border border-stone-300 px-3 py-1.5 text-sm"
+                  className="input min-w-0 flex-1"
                   aria-label="Nama varian"
                 />
                 <Toggle
@@ -247,7 +247,7 @@ function Editor({
                 }
               }}
               placeholder="Nama varian baru"
-              className="min-w-0 flex-1 rounded-xl border border-stone-300 px-3 py-1.5 text-sm"
+              className="input min-w-0 flex-1"
             />
             <Btn variant="ghost" onClick={addVariant}>
               Tambah
@@ -255,11 +255,11 @@ function Editor({
           </div>
         </div>
 
-        <div className="flex items-center justify-between rounded-xl bg-stone-50 px-3 py-2 text-sm">
+        <div className="flex items-center justify-between rounded-2xl bg-stone-50 px-3 py-2 text-sm">
           <span>Stok tersedia (OFF = tampil “Habis”)</span>
           <Toggle checked={available} onChange={setAvailable} label="Stok tersedia" />
         </div>
-        <div className="flex items-center justify-between rounded-xl bg-stone-50 px-3 py-2 text-sm">
+        <div className="flex items-center justify-between rounded-2xl bg-stone-50 px-3 py-2 text-sm">
           <span>Tampilkan di katalog (OFF = disembunyikan)</span>
           <Toggle checked={active} onChange={setActive} label="Tampilkan di katalog" />
         </div>
@@ -342,7 +342,7 @@ export function ProductsPage() {
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
         {shown.map((p) => (
-          <article key={p.id} className="flex flex-col overflow-hidden rounded-2xl border border-stone-200 bg-white">
+          <article key={p.id} className="flex flex-col overflow-hidden surface">
             <button type="button" onClick={() => setEditing(p)} className="text-left">
               <div className="aspect-square bg-stone-100">
                 {p.image_url && <img src={p.image_url} alt="" loading="lazy" className="size-full object-cover" />}

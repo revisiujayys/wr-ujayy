@@ -255,7 +255,7 @@ export function ShopPage() {
             {[1, 2, 3, 4, 5, 6, 0].map((day) => {
               const theme = THEMES.find((t) => t.id === themes[String(day)]);
               return (
-                <li key={day} className="flex items-center gap-2 rounded-xl border border-stone-200 px-3 py-2">
+                <li key={day} className="flex items-center gap-2 rounded-2xl bg-stone-50 px-3 py-2">
                   <span className="size-4 shrink-0 rounded-full" style={{ backgroundColor: theme?.brand }} aria-hidden="true" />
                   <label className="min-w-0 flex-1 text-sm">
                     <span className="block text-xs font-medium text-stone-500">{DAY_NAMES[day]}</span>

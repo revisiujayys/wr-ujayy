@@ -56,7 +56,7 @@ function Login({ onDone }: { onDone: () => void }) {
         <Logo />
         <p className="mt-1 text-sm text-stone-500">Masuk admin</p>
       </div>
-      <form onSubmit={submit} className="space-y-3 rounded-2xl border border-stone-200 bg-white p-5">
+      <form onSubmit={submit} className="space-y-3 surface p-5">
         <Field
           label="Username"
           value={username}
@@ -130,7 +130,7 @@ export default function AdminApp() {
 
   return (
     <div className="min-h-dvh pb-24">
-      <header className="sticky top-0 z-10 border-b border-stone-200 bg-white/90 backdrop-blur">
+      <header className="glass-bar sticky top-0 z-10 rounded-b-[1.75rem]">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
           <Logo />
           <Btn variant="ghost" onClick={() => void logout()} className="px-3 py-1.5">
@@ -148,15 +148,15 @@ export default function AdminApp() {
         {tab === 'report' && <ReportPage />}
       </main>
 
-      <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-stone-200 bg-white" aria-label="Menu admin">
-        <div className="mx-auto grid max-w-5xl grid-cols-5">
+      <nav className="fixed inset-x-0 bottom-0 z-20 px-4 pb-3" aria-label="Menu admin">
+        <div className="glass-bar mx-auto grid max-w-md grid-cols-5 gap-1 rounded-full p-1.5">
           {TABS.map((t) => (
             <button
               key={t.id}
               type="button"
               onClick={() => setTab(t.id)}
               aria-current={tab === t.id ? 'page' : undefined}
-              className={`py-3.5 text-xs font-semibold ${tab === t.id ? 'text-brand' : 'text-stone-500'}`}
+              className={`rounded-full py-2.5 text-xs font-semibold transition-colors ${tab === t.id ? 'bg-brand text-white shadow-sm' : 'text-stone-500'}`}
             >
               {t.label}
             </button>

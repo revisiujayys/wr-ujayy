@@ -9,12 +9,12 @@ export function OrderSuccess({ result, onDone }: { result: OrderResult; onDone: 
       </div>
       <h1 className="text-xl font-bold">Pesanan diterima</h1>
 
-      <section className="grid grid-cols-2 divide-x divide-stone-200 rounded-2xl border border-stone-200 bg-white p-4">
-        <div className="px-2">
+      <section className="grid grid-cols-2 gap-2">
+        <div className="surface px-3 py-4">
           <p className="text-xs text-stone-500">Nomor pesanan</p>
           <p className="allow-select mt-1 break-all text-base font-bold tracking-wide">{result.orderNumber}</p>
         </div>
-        <div className="px-2">
+        <div className="surface px-3 py-4">
           <p className="text-xs text-stone-500">Total pembayaran</p>
           <p className="mt-1 text-xl font-extrabold text-brand">{rupiah(result.total)}</p>
           {result.deliveryFee > 0 && (
